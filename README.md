@@ -5,7 +5,7 @@ Use this guide to setup wpa_supplicant with your UXG-Lite to bypass the ATT mode
 Prerequisites:
 - extracted and decoded certificates from an ATT modem
 
-Instructions to extract certs for newish [BGW210](https://github.com/mozzarellathicc/attcerts)
+Instructions to [extract certs for newish BGW210](https://github.com/mozzarellathicc/attcerts)
 
 ## Install wpa_supplicant
 SSH into your UXG-Lite. It runs Debian, so we can install the `wpasupplicant` package.
@@ -26,9 +26,9 @@ These files come from the mfg_dat_decode tool:
 scp *.pem <uxg-lite>:/etc/wpa_supplicant/certs
 scp wpa_supplicant.conf <uxg-lite>:/etc/wpa_supplicant
 ```
-> Note: Create the `certs` folder first if you need to.
+> Note: Create the `certs` folder in `/etc/wpa_supplicant` first if you need to.
 
-Make sure in the `wpa_supplicant.conf` to modify the `ca_cert`, `client_cert` and `private_key` to absolute paths. In this case, prepend `/etc/wpa_supplicant/certs/` to the filename strings.
+Make sure in the `wpa_supplicant.conf` to modify the `ca_cert`, `client_cert` and `private_key` to use absolute paths. In this case, prepend `/etc/wpa_supplicant/certs/` to the filename strings.
 
 ## Start wpa_supplicant
 
@@ -46,7 +46,10 @@ You should see the message `Successfully initialized wpa_supplicant` if everythi
 
 ## Setup network
 
+ATT authenticates using VLAN ID 0, so we have to tag our WAN port with that.
+
 In your Unifi console/dashboard, under `Settings` -> `Internet` -> `Primary (WAN1)` (or your WAN name if you renamed it), Enable `VLAN ID` and set it to `0`.
+
 ![Alt text](vlan0.png)
 
 Now go unplug the ethernet cable from the ONT port on your ATT Gateway, and plug it into the WAN port on your UXG-Lite.
