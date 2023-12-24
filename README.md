@@ -113,3 +113,15 @@ Set the permissions:
 ```
 sudo chmod 755 /etc/network/if-up.d/changemac
 ```
+
+## Troubleshooting
+
+Some errors I ran into...
+
+<a id="fopen"></a>
+<details>
+  <summary><b>OpenSSL: tls_connection_ca_cert</b></summary>
+    > OpenSSL: tls_connection_ca_cert - Failed to load root certificates error:02001002:system library:fopen:No such file or directory
+
+Make sure in the wpa_supplicant config file to set the absolute path for each certificate, mentioned [here](#copy-certs-and-config-to-uxg-lite).
+</details>
