@@ -8,7 +8,11 @@ Prerequisites:
 Instructions to [extract certs for newish BGW210](https://github.com/mozzarellathicc/attcerts)
 
 ## Install wpa_supplicant on the UXG-Lite
-SSH into your UXG-Lite. It runs Debian, so we can install the `wpasupplicant` package.
+SSH into your UXG-Lite.
+
+> Unlike all my other Unifi devices, my SSH private key didn't work with my username, but worked with the `root` user instead. Or user + password defined in `Settings` -> `System` -> `Advanced` -> `Device Authentication`.
+
+The UXG-Lite runs Debian, so we can install the `wpasupplicant` package.
 ```
 > apt-get install wpasupplicant
 ```
