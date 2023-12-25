@@ -36,11 +36,11 @@ ATT authenticates using VLAN ID 0, so we have to tag our WAN port with that.
 
 In your Unifi console/dashboard, under `Settings` -> `Internet` -> `Primary (WAN1)` (or your WAN name if you renamed it), Enable `VLAN ID` and set it to `0`.
 
+Before applying, note that this change will prevent you from accessing the internet until after running `wpa_supplicant` in the next step. If you need to restore internet access before finishing this setup guide, you can always disable `VLAN ID`.
+
 ![Alt text](vlan0.png)
 
-You will not be able to access the internet after applying this change, until running `wpa_supplicant` in the next step.
-
-Now go unplug the ethernet cable from the ONT port on your ATT Gateway, and plug it into the WAN port on your UXG-Lite.
+Apply the change, then unplug the ethernet cable from the ONT port on your ATT Gateway, and plug it into the WAN port on your UXG-Lite.
 
 ## Test wpa_supplicant
 
