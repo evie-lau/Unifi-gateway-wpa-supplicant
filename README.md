@@ -17,8 +17,15 @@ The UXG-Lite runs Debian, so we can install the `wpasupplicant` package.
 > apt-get install wpasupplicant
 ```
 
+Go ahead and create a `certs` folder in the `/etc/wpa_supplicant` folder.
+```
+> mkdir -p /etc/wpa_supplicant/certs
+```
+
+We'll copy files into here in the next step.
+
 ## Copy certs and config to UXG-Lite
-Prepare your files on your computer to copy into the UXG-Lite
+Back on your computer, prepare your files to copy into the UXG-Lite.
 
 These files come from the mfg_dat_decode tool:
 - CA_XXXXXX-XXXXXXXXXXXXXX.pem
@@ -30,18 +37,17 @@ These files come from the mfg_dat_decode tool:
 > scp *.pem <uxg-lite>:/etc/wpa_supplicant/certs
 > scp wpa_supplicant.conf <uxg-lite>:/etc/wpa_supplicant
 ```
-> Note: Create the `certs` folder in `/etc/wpa_supplicant` first if you need to.
 
 Make sure in the `wpa_supplicant.conf` to modify the `ca_cert`, `client_cert` and `private_key` to use absolute paths. In this case, prepend `/etc/wpa_supplicant/certs/` to the filename strings.
 
 ## Spoof MAC address
-We'll need to spoof the MAC address on the WAN port (eth1 on the UXG-Lite) to successfully authenticate with ATT with our certificates.
+We'll need to spoof the MAC address on the WAN port (interface `eth1` on the UXG-Lite) to successfully authenticate with ATT with our certificates.
 
-I know there's an option in the Unifi dashboard to spoof MAC address on the Internet (WAN) network, but this didn't work when I tested it. (If anyone does test this successfully, please let me know).
+I know there's an option in the Unifi dashboard to spoof MAC address on the Internet (WAN) network, but this didn't seem to work when I tested it. (If anyone does test this successfully, please let me know).
 
 Instead, I had to manually set it up, based on these [instructions to spoof mac address](https://www.xmodulo.com/spoof-mac-address-network-interface-linux.html).
 
-SSH into your UXG-Lite, and create the following file.
+SSH back into your UXG-Lite, and create the following file.
 
 `vi /etc/network/if-up.d/changemac`
 
@@ -58,7 +64,7 @@ Set the permissions:
 ```
 sudo chmod 755 /etc/network/if-up.d/changemac
 ```
-This file will spoof your WAN mac address on startup. Go ahead and run the same command now so you don't have to reboot your UXG-Lite.
+This file will spoof your WAN mac address when `eth1` starts up. Go ahead and run the same command now so you don't have to reboot your UXG-Lite.
 ```
 ip link set dev "$IFACE" address XX:XX:XX:XX:XX:XX
 ```
@@ -77,7 +83,7 @@ Before applying, note that this change will prevent you from accessing the inter
 Apply the change, then unplug the ethernet cable from the ONT port on your ATT Gateway, and plug it into the WAN port on your UXG-Lite.
 
 ## Test wpa_supplicant
-
+While SSHed into the UXG-Lite, run this to test the authentication.
 ```
 > wpa_supplicant -i eth1 -D wired -c /etc/wpa_supplicant/wpa_supplicant.conf
 ```
@@ -95,6 +101,7 @@ eth1: CTRL-EVENT-EAP-PEER-ALT depth=0 DNS:aut03lsanca.lsanca.sbcglobal.net
 eth1: CTRL-EVENT-EAP-SUCCESS EAP authentication completed successfully
 eth1: CTRL-EVENT-CONNECTED - Connection to XX:XX:XX:XX:XX:XX completed [id=0 id_str=]
 ```
+> If you don't see the `EAP authentication completed successfully` message, try checking to make sure the MAC address was spoofed successfully.
 
 `Ctrl-c` to exit. If you would like to run it in the background for temporary internet access, add a `-B` parameter to the command. Running this command is still a manual process to authenticate, and it will only last until the next reboot.
 
