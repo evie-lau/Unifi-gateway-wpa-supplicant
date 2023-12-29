@@ -1,6 +1,6 @@
 # UXG-Lite wpa_supplicant bypass ATT fiber modem
 
-> NOTE: While this method will survive through reboots, it did not survive a firmware update, which seemed to wipe the packages installed from apt-get. I had to reconnect the ATT modem to redownload the `wpasupplicant`` package again. May have to adapt another approach to be more robust.
+> NOTE: While this method will survive through reboots, it did not survive a firmware update, which seemed to wipe the packages installed from apt-get. I had to reconnect the ATT modem to redownload the `wpasupplicant` package again. May have to adapt another approach to be more robust, like downloading a permanent copy of wpasupplicant.
 
 Use this guide to setup wpa_supplicant with your UXG-Lite to bypass the ATT modem.
 
@@ -118,7 +118,7 @@ eth1: CTRL-EVENT-CONNECTED - Connection to XX:XX:XX:XX:XX:XX completed [id=0 id_
 `Ctrl-c` to exit. If you would like to run it in the background for temporary internet access, add a `-B` parameter to the command. Running this command is still a manual process to authenticate, and it will only last until the next reboot.
 
 ## Setup wpa_supplicant service for startup
-Now we have to make sure wpa_supplicant starts automatically when the UXG-Lite reboots, whether from firmware updates or power interruptions.
+Now we have to make sure wpa_supplicant starts automatically when the UXG-Lite reboots.
 
 Let's use wpa_supplicant's built in interface-specific service to enable it on startup. More information [here](https://wiki.archlinux.org/title/Wpa_supplicant#At_boot_.28systemd.29).
 
@@ -147,7 +147,7 @@ Try restarting your UXG-Lite if you wish, and it should automatically authentica
 
 ## Troubleshooting
 
-Some errors I ran into...
+Some problems I ran into...
 
 <a id="fopen"></a>
 <details>
@@ -156,3 +156,15 @@ Some errors I ran into...
 
 Make sure in the wpa_supplicant config file to set the absolute path for each certificate, mentioned [here](#copy-certs-and-config-to-uxg-lite).
 </details>
+<a id=firmware_update></a>
+<details>
+  <summary><b>Firmware update for UXG-Lite broke wpa_supplicant</b></summary>
+
+  1. Plug the ATT gateway back in, remove the ONT ethernet from the UXG-Lite, connect it back into the ONT port, and connect ethernet from gateway to UXG-Lite WAN port.
+  2. Disable VLAN ID 0 to restore internet access
+  3. SSH into UXG-Lite. `apt-get update` and `apt-get install wpasupplicant` to reinstall
+  4. `systemctl enable wpa_supplicant-wired@eth1` to re-enable the service.
+  5. Undo step 1 to have ONT straight to UXG-Lite WAN port again.
+  6. Undo step 2, enable VLAN ID 0 again.
+  7. `systemctl start wpa_supplicant-wired@eth1`
+  8. Check authentication with `systemctl status wpa_supplicant-wired@eth1`
