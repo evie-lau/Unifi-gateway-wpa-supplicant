@@ -1,5 +1,7 @@
 # UXG-Lite wpa_supplicant bypass ATT fiber modem
 
+> NOTE: While this method will survive through reboots, it did not survive a firmware update, which seemed to wipe the packages installed from apt-get. I had to reconnect the ATT modem to redownload the `wpasupplicant`` package again. May have to adapt another approach to be more robust.
+
 Use this guide to setup wpa_supplicant with your UXG-Lite to bypass the ATT modem.
 
 Prerequisites:
@@ -12,8 +14,9 @@ SSH into your UXG-Lite.
 
 > Unlike all my other Unifi devices, my SSH private key didn't work with my username, but worked with the `root` user instead. Or user + password defined in `Settings` -> `System` -> `Advanced` -> `Device Authentication`.
 
-The UXG-Lite runs Debian, so we can install the `wpasupplicant` package.
+The UXG-Lite runs a custom Debian-based distro, so we can install the `wpasupplicant` package.
 ```
+> apt-get update
 > apt-get install wpasupplicant
 ```
 
@@ -52,7 +55,7 @@ network={
 ## Spoof MAC address
 We'll need to spoof the MAC address on the WAN port (interface `eth1` on the UXG-Lite) to successfully authenticate with ATT with our certificates.
 
-I know there's an option in the Unifi dashboard to spoof MAC address on the Internet (WAN) network, but this didn't seem to work when I tested it. (If anyone does test this successfully, please let me know).
+I know there's an option in the Unifi dashboard to spoof MAC address on the Internet (WAN) network, but this didn't seem to work when I tested it. (If anyone does test this successfully without needing the following, please let me know).
 
 Instead, I had to manually set it up, based on these [instructions to spoof mac address](https://www.xmodulo.com/spoof-mac-address-network-interface-linux.html).
 
