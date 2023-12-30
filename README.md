@@ -161,8 +161,8 @@ Let's first download the required packages (with dependencies) from debian into 
 
 ```
 > cd /persistent/dpkg/bullseye/packages
-> wget https://packages.debian.org/bullseye/arm64/libpcsclite1/download
-> wget https://packages.debian.org/bullseye/arm64/wpasupplicant/download
+> wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.9.0-21_arm64.deb
+> wget http://ftp.us.debian.org/debian/pool/main/p/pcsc-lite/libpcsclite1_1.9.1-1_arm64.deb
 ```
 
 Now let's create a service file to install these packages and enable/start wpa_supplicant:
