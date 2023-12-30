@@ -196,7 +196,9 @@ Now enable the service.
 ```
 This service should run on startup, and do it's thing to install and startup wpa_supplicant.
 
-### (Optional) If you want to test this...
+<details>
+<summary><h3>(Optional) If you want to test this...</h3></summary>
+
 ```
 > systemctl stop wpa_supplicant-wired@eth1
 > systemctl disable wpa_supplicant-wired@eth1
@@ -213,6 +215,7 @@ Active: active (running) ...
 ...
 Dec 29 23:20:00 UXG-Lite wpa_supplicant[6845]: eth1: CTRL-EVENT-EAP-SUCCESS EAP authentication completed successfully
 ```
+</details>
 
 ## Troubleshooting
 
@@ -221,9 +224,10 @@ Some problems I ran into...
 <a id="fopen"></a>
 <details>
   <summary><b>OpenSSL: tls_connection_ca_cert</b></summary>
+
     > OpenSSL: tls_connection_ca_cert - Failed to load root certificates error:02001002:system library:fopen:No such file or directory
 
-Make sure in the wpa_supplicant config file to set the absolute path for each certificate, mentioned [here](#copy-certs-and-config-to-uxg-lite).
+- Make sure in the wpa_supplicant config file to set the absolute path for each certificate, mentioned [here](#copy-certs-and-config-to-uxg-lite).
 </details>
 
 ## Additional resources
