@@ -22,13 +22,13 @@ SSH into your UXG-Lite.
 
 > Unlike all my other Unifi devices, my SSH private key didn't work with my username, but worked with the `root` user instead. Or user + password defined in `Settings` -> `System` -> `Advanced` -> `Device Authentication`.
 
-The UXG-Lite runs a custom Debian-based distro, so we can install the `wpasupplicant` package.
+Unifi OS is a Debian-based distro, so we can install the `wpasupplicant` package.
 ```
 > apt update -y
 > apt install -y wpasupplicant
 ```
 
-Go ahead and create a `certs` folder in the `/etc/wpa_supplicant` folder.
+Create a `certs` folder in the `/etc/wpa_supplicant` folder.
 ```
 > mkdir -p /etc/wpa_supplicant/certs
 ```
@@ -154,11 +154,13 @@ Now we can go ahead and enable the service.
 Try restarting your UXG-Lite if you wish, and it should automatically authenticate!
 
 ## Survive firmware updates
-So it seems firmware updates will nuke the packages installed through `apt`, removing our wpa_supplicant service. Let's cache some files and a system service to automatically reinstall wpa_supplicant and enable and start the service again on bootup.
+Firmware updates will nuke the packages installed through `apt` that don't come with the stock Unifi OS, removing our `wpasupplicant` package and service. Since we'll no longer have internet without wpa_supplicant authenticating us with ATT, we can't reinstall it from the debian repos.
 
-Let's first download the required packages (with dependencies) from debian into a persisted folder.
+Let's cache some files locally and create a system service to automatically reinstall, start, and enable wpa_supplicant again on bootup.
 
-> As of the 3.1.15 -> 3.1.16 firmware update, my `/etc/wpa_supplicant` folder did not get wiped, so these should persist through an update for us to reinstall.
+First download the required packages (with missing dependencies) from debian into a persisted folder. These are the resources if you wish to pull the latest download links. Make sure to get the `arm64` package.
+- https://packages.debian.org/bullseye/arm64/wpasupplicant/download
+- https://packages.debian.org/bullseye/arm64/libpcsclite1/download
 
 ```
 > mkdir -p /etc/wpa_supplicant/packages
@@ -167,18 +169,20 @@ Let's first download the required packages (with dependencies) from debian into 
 > wget http://ftp.us.debian.org/debian/pool/main/p/pcsc-lite/libpcsclite1_1.9.1-1_arm64.deb
 ```
 
-Now let's create a service file to install these packages and enable/start wpa_supplicant:
+> As of the 3.1.15 -> 3.1.16 firmware update, my `/etc/wpa_supplicant` folder did not get wiped, so these should persist through an update for us to reinstall.
+
+Now let's create a service to install these packages and enable/start wpa_supplicant:
 
 ```
 > vi /etc/systemd/system/reinstall-wpa.service
 ```
 
-Paste this as the contents:
+Paste this as the content:
 ```
 [Unit]
 Description=Reinstall and start/enable wpa_supplicant
-AssertPathExistsGlob=/etc/wpa_supplicant/packages/wpasupplicant*.deb
-AssertPathExistsGlob=/etc/wpa_supplicant/packages/libpcsclite1*.deb
+AssertPathExistsGlob=/etc/wpa_supplicant/packages/wpasupplicant*arm64.deb
+AssertPathExistsGlob=/etc/wpa_supplicant/packages/libpcsclite1*arm64.deb
 ConditionPathExists=!/sbin/wpa_supplicant
 
 [Service]
@@ -237,4 +241,4 @@ Special thanks to many of these resources I used to learn all this (nearly from 
 - [ArchWiki wpa_supplicant guide](https://wiki.archlinux.org/title/Wpa_supplicant) where I learned to use wpa_supplicant
 - [Spoofing MAC on interfaces](https://www.xmodulo.com/spoof-mac-address-network-interface-linux.html) for spoofing MAC
 - [DigitalOcean Systemd unit files](https://www.digitalocean.com/community/tutorials/understanding-systemd-units-and-unit-files) for info on systemd unit files
-- [Post by /u/superm1](https://www.reddit.com/r/Ubiquiti/comments/18rc0ag/att_modem_bypass_and_unifios_32x_guide/) who posted a similar approach to mine a few days after. I adapted the reinstall service with some improvements
+- [Post by /u/superm1](https://www.reddit.com/r/Ubiquiti/comments/18rc0ag/att_modem_bypass_and_unifios_32x_guide/) who posted a similar approach to mine a few days after. I adapted the reinstall service with some extra checks and improvements to also start/enable wpasupplicant after installing.
