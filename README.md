@@ -154,15 +154,15 @@ Now we can go ahead and enable the service.
 Try restarting your UXG-Lite if you wish, and it should automatically authenticate!
 
 ## Survive firmware updates
-> NOTE: This has been tested with reboots and have confirmed working with no internet connection. Just haven't confirmed if this service itself will survive an actual firmware update.
-
 So it seems firmware updates will nuke the packages installed through `apt`, removing our wpa_supplicant service. Let's cache some files and a system service to automatically reinstall wpa_supplicant and enable and start the service again on bootup.
 
 Let's first download the required packages (with dependencies) from debian into a persisted folder.
-> TODO: confirm these files stays after a firmware update
+
+> As of the 3.1.15 -> 3.1.16 firmware update, my `/etc/wpa_supplicant` folder did not get wiped, so these should persist through an update for us to reinstall.
 
 ```
-> cd /persistent/dpkg/bullseye/packages
+> mkdir -p /etc/wpa_supplicant/packages
+> cd /etc/wpa_supplicant/packages
 > wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.9.0-21_arm64.deb
 > wget http://ftp.us.debian.org/debian/pool/main/p/pcsc-lite/libpcsclite1_1.9.1-1_arm64.deb
 ```
@@ -176,13 +176,14 @@ Now let's create a service file to install these packages and enable/start wpa_s
 Paste this as the contents:
 ```
 [Unit]
-Description=Reinstall wpa_supplicant and enable/start it
-AssertPathExistsGlob=/persistent/dpkg/bullseye/packages/wpasupplicant*
+Description=Reinstall and start/enable wpa_supplicant
+AssertPathExistsGlob=/etc/wpa_supplicant/packages/wpasupplicant*.deb
+AssertPathExistsGlob=/etc/wpa_supplicant/packages/libpcsclite1*.deb
 ConditionPathExists=!/sbin/wpa_supplicant
 
 [Service]
 Type=oneshot
-ExecStartPre=dpkg -Ri /persistent/dpkg/bullseye/packages
+ExecStartPre=dpkg -Ri /etc/wpa_supplicant/packages
 ExecStart=systemctl start wpa_supplicant-wired@eth1
 ExecStartPost=systemctl enable wpa_supplicant-wired@eth1
 
@@ -194,7 +195,7 @@ Now enable the service.
 > systemctl daemon-reload
 > systemctl enable reinstall-wpa.service
 ```
-This service should run on startup, and do it's thing to install and startup wpa_supplicant.
+This service should run on startup. It will check if `/sbin/wpasupplicant` got wiped, and if our package files exist. If both are true, it will install and startup wpa_supplicant.
 
 <details>
 <summary><h3>(Optional) If you want to test this...</h3></summary>
