@@ -222,3 +222,11 @@ Some problems I ran into...
 
 Make sure in the wpa_supplicant config file to set the absolute path for each certificate, mentioned [here](#copy-certs-and-config-to-uxg-lite).
 </details>
+
+## Additional resources
+Special thanks to many of these resources I used to learn all this (nearly from scratch).
+- [Guide for USG wpa_supplicant](https://wells.ee/journal/2020-03-01-bypassing-att-fiber-modem-unifi-usg/)
+- [ArchWiki wpa_supplicant guide](https://wiki.archlinux.org/title/Wpa_supplicant) where I learned to use wpa_supplicant
+- [Spoofing MAC on interfaces](https://www.xmodulo.com/spoof-mac-address-network-interface-linux.html) for spoofing MAC
+- [DigitalOcean Systemd unit files](https://www.digitalocean.com/community/tutorials/understanding-systemd-units-and-unit-files) for info on systemd unit files
+- [Post by /u/superm1](https://www.reddit.com/r/Ubiquiti/comments/18rc0ag/att_modem_bypass_and_unifios_32x_guide/) who posted a similar approach to mine a few days after. I adapted the reinstall service with some improvements
