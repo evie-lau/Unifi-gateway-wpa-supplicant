@@ -179,7 +179,7 @@ ConditionPathExists=!/sbin/wpa_supplicant
 
 [Service]
 Type=simple
-ExecStartPre=apt install wpasupplicant -y
+ExecStartPre=dpkg -Ri /persistent/dpkg/bullseye/packages
 ExecStart=systemctl enable wpa_supplicant-wired@eth1
 ExecStartPost=systemctl start wpa_supplicant-wired@eth1
 
