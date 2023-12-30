@@ -1,6 +1,8 @@
 # UXG-Lite wpa_supplicant bypass ATT fiber modem
 Use this guide to setup wpa_supplicant with your UXG-Lite to bypass the ATT modem.
 
+This should also work on other Unifi OS devices, just may have to replace the interface name with the device's WAN port interface.
+
 Prerequisites:
 - extracted and decoded certificates from an ATT modem
 
@@ -168,20 +170,21 @@ Let's first download the required packages (with dependencies) from debian into 
 Now let's create a service file to install these packages and enable/start wpa_supplicant:
 
 ```
-> vi /etc/systemd/system/setup_wpa_supplicant.service
+> vi /etc/systemd/system/reinstall-wpa.service
 ```
 
 Paste this as the contents:
 ```
 [Unit]
 Description=Reinstall wpa_supplicant and enable/start it
+AssertPathExistsGlob=/persistent/dpkg/bullseye/packages/wpasupplicant*
 ConditionPathExists=!/sbin/wpa_supplicant
 
 [Service]
-Type=simple
+Type=oneshot
 ExecStartPre=dpkg -Ri /persistent/dpkg/bullseye/packages
-ExecStart=systemctl enable wpa_supplicant-wired@eth1
-ExecStartPost=systemctl start wpa_supplicant-wired@eth1
+ExecStart=systemctl start wpa_supplicant-wired@eth1
+ExecStartPost=systemctl enable wpa_supplicant-wired@eth1
 
 [Install]
 WantedBy=multi-user.target
@@ -189,7 +192,7 @@ WantedBy=multi-user.target
 Now enable the service.
 ```
 > systemctl daemon-reload
-> systemctl enable setup_wpa_supplicant.service
+> systemctl enable reinstall-wpa.service
 ```
 This service should run on startup, and do it's thing to install and startup wpa_supplicant.
 
