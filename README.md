@@ -1,13 +1,19 @@
 # UXG-Lite wpa_supplicant bypass ATT fiber modem
-
-> NOTE: While this method will survive through reboots, it did not survive a firmware update, which seemed to wipe the packages installed from apt-get. I had to reconnect the ATT modem to redownload the `wpasupplicant` package again. May have to adapt another approach to be more robust, like downloading a permanent copy of wpasupplicant.
-
 Use this guide to setup wpa_supplicant with your UXG-Lite to bypass the ATT modem.
 
 Prerequisites:
 - extracted and decoded certificates from an ATT modem
 
 Instructions to [extract certs for newish BGW210](https://github.com/mozzarellathicc/attcerts)
+
+## Table of Contents
+- [Install wpa_supplicant](#install-wpa_supplicant-on-the-uxg-lite)
+- [Copy certs and config](#copy-certs-and-config-to-uxg-lite)
+- [Spoof MAC Address](#spoof-mac-address)
+- [Setup network](#setup-network)
+- [Test wpa_supplicant](#test-wpa_supplicant)
+- [Setup wpa_supplicant service for startup](#setup-wpa_supplicant-service-for-startup)
+- [Survive firmware updates](#survive-firmware-updates)
 
 ## Install wpa_supplicant on the UXG-Lite
 SSH into your UXG-Lite.
@@ -16,8 +22,8 @@ SSH into your UXG-Lite.
 
 The UXG-Lite runs a custom Debian-based distro, so we can install the `wpasupplicant` package.
 ```
-> apt-get update
-> apt-get install wpasupplicant
+> apt update -y
+> apt install -y wpasupplicant
 ```
 
 Go ahead and create a `certs` folder in the `/etc/wpa_supplicant` folder.
@@ -74,11 +80,11 @@ Replace the mac address with your gateway's address, found in the `wpa_supplican
 
 Set the permissions:
 ```
-sudo chmod 755 /etc/network/if-up.d/changemac
+> sudo chmod 755 /etc/network/if-up.d/changemac
 ```
 This file will spoof your WAN mac address when `eth1` starts up. Go ahead and run the same command now so you don't have to reboot your UXG-Lite.
 ```
-ip link set dev "$IFACE" address XX:XX:XX:XX:XX:XX
+> ip link set dev "$IFACE" address XX:XX:XX:XX:XX:XX
 ```
 
 ## Setup network
@@ -145,6 +151,66 @@ Now we can go ahead and enable the service.
 
 Try restarting your UXG-Lite if you wish, and it should automatically authenticate!
 
+## Survive firmware updates
+> NOTE: This has been tested with reboots and have confirmed working with no internet connection. Just haven't confirmed if this service itself will survive an actual firmware update.
+
+So it seems firmware updates will nuke the packages installed through `apt`, removing our wpa_supplicant service. Let's cache some files and a system service to automatically reinstall wpa_supplicant and enable and start the service again on bootup.
+
+Let's first download the required packages (with dependencies) from debian into a persisted folder.
+> TODO: confirm these files stays after a firmware update
+
+```
+> cd /persistent/dpkg/bullseye/packages
+> wget https://packages.debian.org/bullseye/arm64/libpcsclite1/download
+> wget https://packages.debian.org/bullseye/arm64/wpasupplicant/download
+```
+
+Now let's create a service file to install these packages and enable/start wpa_supplicant:
+
+```
+> vi /etc/systemd/system/setup_wpa_supplicant.service
+```
+
+Paste this as the contents:
+```
+[Unit]
+Description=Reinstall wpa_supplicant and enable/start it
+ConditionPathExists=!/sbin/wpa_supplicant
+
+[Service]
+Type=simple
+ExecStartPre=apt install wpasupplicant -y
+ExecStart=systemctl enable wpa_supplicant-wired@eth1
+ExecStartPost=systemctl start wpa_supplicant-wired@eth1
+
+[Install]
+WantedBy=multi-user.target
+```
+Now enable the service.
+```
+> systemctl daemon-reload
+> systemctl enable setup_wpa_supplicant.service
+```
+This service should run on startup, and do it's thing to install and startup wpa_supplicant.
+
+### (Optional) If you want to test this...
+```
+> systemctl stop wpa_supplicant-wired@eth1
+> systemctl disable wpa_supplicant-wired@eth1
+> apt remove wpasupplicant -y
+```
+
+Now try restarting your UXG-Lite. Upon boot up, SSH back in, and check `systemctl status wpa_supplicant-wired@eth1`.
+- Alternatively, without a restart, run `systemctl start reinstall.service`, wait until it finishes, then `systemctl status wpa_supplicant-wired@eth1`.)
+
+You should see the following:
+```
+Loaded: loaded (/lib/systemd/system/wpa_supplicant-wired@.service; enabled; vendor preset: enabled)
+Active: active (running) ...
+...
+Dec 29 23:20:00 UXG-Lite wpa_supplicant[6845]: eth1: CTRL-EVENT-EAP-SUCCESS EAP authentication completed successfully
+```
+
 ## Troubleshooting
 
 Some problems I ran into...
@@ -156,15 +222,3 @@ Some problems I ran into...
 
 Make sure in the wpa_supplicant config file to set the absolute path for each certificate, mentioned [here](#copy-certs-and-config-to-uxg-lite).
 </details>
-<a id=firmware_update></a>
-<details>
-  <summary><b>Firmware update for UXG-Lite broke wpa_supplicant</b></summary>
-
-  1. Plug the ATT gateway back in, remove the ONT ethernet from the UXG-Lite, connect it back into the ONT port, and connect ethernet from gateway to UXG-Lite WAN port.
-  2. Disable VLAN ID 0 to restore internet access
-  3. SSH into UXG-Lite. `apt-get update` and `apt-get install wpasupplicant` to reinstall
-  4. `systemctl enable wpa_supplicant-wired@eth1` to re-enable the service.
-  5. Undo step 1 to have ONT straight to UXG-Lite WAN port again.
-  6. Undo step 2, enable VLAN ID 0 again.
-  7. `systemctl start wpa_supplicant-wired@eth1`
-  8. Check authentication with `systemctl status wpa_supplicant-wired@eth1`
