@@ -9,13 +9,13 @@ Prerequisites:
 Instructions to [extract certs for newish BGW210](https://github.com/mozzarellathicc/attcerts)
 
 ## Table of Contents
-- [Install wpa_supplicant](#install-wpa_supplicant-on-the-uxg-lite)
-- [Copy certs and config](#copy-certs-and-config-to-uxg-lite)
-- [Spoof MAC Address](#spoof-mac-address)
-- [Setup network](#setup-network)
-- [Test wpa_supplicant](#test-wpa_supplicant)
-- [Setup wpa_supplicant service for startup](#setup-wpa_supplicant-service-for-startup)
-- [Survive firmware updates](#survive-firmware-updates)
+- [Install wpa_supplicant](#install-wpa_supplicant-on-the-uxg-lite) - install wpasupplicant on your Unifi gateway
+- [Copy certs and config](#copy-certs-and-config-to-uxg-lite) - copy files generated from mfg_dat_decode tool into Unifi gateway
+- [Spoof MAC Address](#spoof-mac-address) - spoof Unifi WAN port to match original ATT gateway MAC address
+- [Setup network](#setup-network) - set required network settings (VLAN0) in Unifi dashboard
+- [Test wpa_supplicant](#test-wpa_supplicant) - test wpasupplicant
+- [Setup wpa_supplicant service for startup](#setup-wpa_supplicant-service-for-startup) - start wpasupplicant on Unifi router bootup
+- [Survive firmware updates](#survive-firmware-updates) - automatically restore and setup wpasupplicant after firmware updates wipe it
 
 ## Install wpa_supplicant on the UXG-Lite
 SSH into your UXG-Lite.
