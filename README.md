@@ -1,7 +1,9 @@
 # UXG-Lite wpa_supplicant bypass ATT fiber modem
-Use this guide to setup wpa_supplicant with your UXG-Lite to bypass the ATT modem.
+Use this guide to setup wpa_supplicant with your UXG-Lite or Unifi OS gateway/router to bypass the ATT modem.
 
 This should also work on other Unifi OS devices, just may have to replace the interface name with the device's WAN port interface.
+
+> NOTE: Take note of your Unifi router's WAN port interface name. In the rest of the guide, I'll be using `eth1` because that is the WAN interface for the UXG Lite. If using another device, replace the interface name appropriately.
 
 Prerequisites:
 - extracted and decoded certificates from an ATT modem
