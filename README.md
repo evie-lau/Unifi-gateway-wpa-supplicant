@@ -189,9 +189,9 @@ ConditionPathExists=!/sbin/wpa_supplicant
 
 [Service]
 Type=oneshot
-ExecStartPre=dpkg -Ri /etc/wpa_supplicant/packages
-ExecStart=systemctl start wpa_supplicant-wired@eth1
-ExecStartPost=systemctl enable wpa_supplicant-wired@eth1
+ExecStartPre=/bin/sh -c 'dpkg -Ri /etc/wpa_supplicant/packages'
+ExecStart=/bin/sh -c 'systemctl start wpa_supplicant-wired@eth1'
+ExecStartPost=/bin/sh -c 'systemctl enable wpa_supplicant-wired@eth1'
 
 [Install]
 WantedBy=multi-user.target
