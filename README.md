@@ -1,6 +1,7 @@
-# UXG-Lite wpa_supplicant bypass ATT fiber modem
-Use this guide to setup wpa_supplicant with your UXG-Lite or Unifi OS gateway/router to bypass the ATT modem.
+# Unifi OS Gateway wpa_supplicant bypass for ATT fiber modem
+Use this guide to setup wpa_supplicant with your Unifi OS gateway/router to bypass the ATT modem.
 
+This guide was written specifically for the UXG Lite.
 This should also work on other Unifi OS devices, just may have to replace the interface name with the device's WAN port interface.
 
 > NOTE: Take note of your Unifi router's WAN port interface name. In the rest of the guide, I'll be using `eth1` because that is the WAN interface for the UXG Lite. If using another device, replace the interface name appropriately.
@@ -11,16 +12,16 @@ Prerequisites:
 Instructions to [extract certs for newish BGW210](https://github.com/mozzarellathicc/attcerts)
 
 ## Table of Contents
-- [Install wpa_supplicant](#install-wpa_supplicant-on-the-uxg-lite) - install wpasupplicant on your Unifi gateway
-- [Copy certs and config](#copy-certs-and-config-to-uxg-lite) - copy files generated from mfg_dat_decode tool into Unifi gateway
+- [Install wpa_supplicant](#install-wpa_supplicant-on-unifi-gateway) - install wpasupplicant on your Unifi gateway
+- [Copy certs and config](#copy-certs-and-config-to-unifi-gateway) - copy files generated from mfg_dat_decode tool into Unifi gateway
 - [Spoof MAC Address](#spoof-mac-address) - spoof Unifi WAN port to match original ATT gateway MAC address
 - [Setup network](#setup-network) - set required network settings (VLAN0) in Unifi dashboard
 - [Test wpa_supplicant](#test-wpa_supplicant) - test wpasupplicant
 - [Setup wpa_supplicant service for startup](#setup-wpa_supplicant-service-for-startup) - start wpasupplicant on Unifi router bootup
 - [Survive firmware updates](#survive-firmware-updates) - automatically restore and setup wpasupplicant after firmware updates wipe it
 
-## Install wpa_supplicant on the UXG-Lite
-SSH into your UXG-Lite.
+## Install wpa_supplicant on Unifi gateway
+SSH into your Unifi gateway.
 
 > Unlike all my other Unifi devices, my SSH private key didn't work with my username, but worked with the `root` user instead. Or user + password defined in `Settings` -> `System` -> `Advanced` -> `Device Authentication`.
 
@@ -37,8 +38,8 @@ Create a `certs` folder in the `/etc/wpa_supplicant` folder.
 
 We'll copy files into here in the next step.
 
-## Copy certs and config to UXG-Lite
-Back on your computer, prepare your files to copy into the UXG-Lite.
+## Copy certs and config to Unifi gateway
+Back on your computer, prepare your files to copy into the Unifi gateway.
 
 These files come from the mfg_dat_decode tool:
 - CA_XXXXXX-XXXXXXXXXXXXXX.pem
@@ -47,8 +48,8 @@ These files come from the mfg_dat_decode tool:
 - wpa_supplicant.conf
 
 ```
-> scp *.pem <uxg-lite>:/etc/wpa_supplicant/certs
-> scp wpa_supplicant.conf <uxg-lite>:/etc/wpa_supplicant
+> scp *.pem <gateway>:/etc/wpa_supplicant/certs
+> scp wpa_supplicant.conf <gateway>:/etc/wpa_supplicant
 ```
 
 Make sure in the `wpa_supplicant.conf` to modify the `ca_cert`, `client_cert` and `private_key` to use absolute paths. In this case, prepend `/etc/wpa_supplicant/certs/` to the filename strings. It should look like the following...
@@ -69,7 +70,7 @@ I know there's an option in the Unifi dashboard to spoof MAC address on the Inte
 
 Instead, I had to manually set it up, based on these [instructions to spoof mac address](https://www.xmodulo.com/spoof-mac-address-network-interface-linux.html).
 
-SSH back into your UXG-Lite, and create the following file.
+SSH back into your gateway, and create the following file.
 
 `vi /etc/network/if-up.d/changemac`
 
@@ -86,7 +87,7 @@ Set the permissions:
 ```
 > sudo chmod 755 /etc/network/if-up.d/changemac
 ```
-This file will spoof your WAN mac address when `eth1` starts up. Go ahead and run the same command now so you don't have to reboot your UXG-Lite.
+This file will spoof your WAN mac address when `eth1` starts up. Go ahead and run the same command now so you don't have to reboot your gateway.
 ```
 > ip link set dev "$IFACE" address XX:XX:XX:XX:XX:XX
 ```
@@ -102,10 +103,10 @@ Before applying, note that this change will prevent you from accessing the inter
 
 ![Alt text](vlan0.png)
 
-Apply the change, then unplug the ethernet cable from the ONT port on your ATT Gateway, and plug it into the WAN port on your UXG-Lite.
+Apply the change, then unplug the ethernet cable from the ONT port on your ATT Gateway, and plug it into the WAN port on your Unifi gateway.
 
 ## Test wpa_supplicant
-While SSHed into the UXG-Lite, run this to test the authentication.
+While SSHed into the gateway, run this to test the authentication.
 ```
 > wpa_supplicant -i eth1 -D wired -c /etc/wpa_supplicant/wpa_supplicant.conf
 ```
@@ -128,7 +129,7 @@ eth1: CTRL-EVENT-CONNECTED - Connection to XX:XX:XX:XX:XX:XX completed [id=0 id_
 `Ctrl-c` to exit. If you would like to run it in the background for temporary internet access, add a `-B` parameter to the command. Running this command is still a manual process to authenticate, and it will only last until the next reboot.
 
 ## Setup wpa_supplicant service for startup
-Now we have to make sure wpa_supplicant starts automatically when the UXG-Lite reboots.
+Now we have to make sure wpa_supplicant starts automatically when the Unifi gateway reboots.
 
 Let's use wpa_supplicant's built in interface-specific service to enable it on startup. More information [here](https://wiki.archlinux.org/title/Wpa_supplicant#At_boot_.28systemd.29).
 
@@ -153,7 +154,7 @@ Now we can go ahead and enable the service.
 > systemctl enable wpa_supplicant-wired@eth1
 ```
 
-Try restarting your UXG-Lite if you wish, and it should automatically authenticate!
+Try restarting your Unifi gateway if you wish, and it should automatically authenticate!
 
 ## Survive firmware updates
 Firmware updates will nuke the packages installed through `apt` that don't come with the stock Unifi OS, removing our `wpasupplicant` package and service. Since we'll no longer have internet without wpa_supplicant authenticating us with ATT, we can't reinstall it from the debian repos.
@@ -212,7 +213,7 @@ This service should run on startup. It will check if `/sbin/wpasupplicant` got w
 > apt remove wpasupplicant -y
 ```
 
-Now try restarting your UXG-Lite. Upon boot up, SSH back in, and check `systemctl status wpa_supplicant-wired@eth1`.
+Now try restarting your gateway. Upon boot up, SSH back in, and check `systemctl status wpa_supplicant-wired@eth1`.
 - Alternatively, without a restart, run `systemctl start reinstall.service`, wait until it finishes, then `systemctl status wpa_supplicant-wired@eth1`.)
 
 You should see the following:
@@ -234,7 +235,7 @@ Some problems I ran into...
 
     > OpenSSL: tls_connection_ca_cert - Failed to load root certificates error:02001002:system library:fopen:No such file or directory
 
-- Make sure in the wpa_supplicant config file to set the absolute path for each certificate, mentioned [here](#copy-certs-and-config-to-uxg-lite).
+- Make sure in the wpa_supplicant config file to set the absolute path for each certificate, mentioned [here](#copy-certs-and-config-to-unifi-gateway).
 </details>
 
 ## Additional resources
