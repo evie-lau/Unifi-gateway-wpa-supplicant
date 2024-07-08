@@ -1,13 +1,17 @@
 # Unifi Gateway wpa_supplicant bypass for ATT fiber modem
-Use this guide to setup wpa_supplicant with your Unifi gateway to bypass the ATT modem.
+Use this guide to setup wpa_supplicant with your Unifi gateway to bypass the ATT modem. 
+
+This will work on any modern [Unifi Console or Gateway](https://www.reddit.com/r/Ubiquiti/comments/1870ryr/unifi_gateways_explained_as_simple_as_possible/). To my knowledge, that includes everything except the original USG which will have a different process that is already well documented over the years (check [Additional resources](#additional-resources)).
 
 > NOTE: Take note of your Unifi gateway's WAN port interface name. In the rest of the guide, I'll be using `eth1` because that is the WAN interface for the UXG Lite. If using another Unifi gateway, replace the interface name appropriately.
 
-Here are some known interfaces for Unifi gateways, for use in the rest of the guide
-- UXG Lite - eth1
+Here are some known interfaces for Unifi gateways, for use in the rest of the guide. Double check with your device to be sure.
+- UXG Lite or UX  - eth1
+- UXG Pro - eth0 (WAN1, RJ-45), eth2 (WAN2, SFP+)
 - UXG Max - eth4
 - UCG Ultra - eth4
-- UDM Pro - eth8 (WAN1), eth9 (WAN2)
+- UDR - eth4
+- UDM Pro or SE - eth8 (WAN1, RJ-45), eth9 (WAN2, SFP+)
 
 ### Prerequisites:
 - extracted and decoded certificates from an ATT modem
