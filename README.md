@@ -1,9 +1,9 @@
-# Unifi OS Gateway wpa_supplicant bypass for ATT fiber modem
-Use this guide to setup wpa_supplicant with your Unifi OS gateway/router to bypass the ATT modem.
+# Unifi Gateway wpa_supplicant bypass for ATT fiber modem
+Use this guide to setup wpa_supplicant with your Unifi gateway to bypass the ATT modem.
 
-> NOTE: Take note of your Unifi router's WAN port interface name. In the rest of the guide, I'll be using `eth1` because that is the WAN interface for the UXG Lite. If using another Unifi OS router, replace the interface name appropriately.
+> NOTE: Take note of your Unifi gateway's WAN port interface name. In the rest of the guide, I'll be using `eth1` because that is the WAN interface for the UXG Lite. If using another Unifi gateway, replace the interface name appropriately.
 
-Here are some known interfaces for Unifi OS routers, for use in the rest of the guide
+Here are some known interfaces for Unifi gateways, for use in the rest of the guide
 - UXG Lite - eth1
 - UXG Max - eth4
 - UCG Ultra - eth4
@@ -20,7 +20,7 @@ Instructions to [extract certs for newish BGW210](https://github.com/mozzarellat
 - [Spoof MAC Address](#spoof-mac-address) - spoof Unifi WAN port to match original ATT gateway MAC address
 - [Setup network](#setup-network) - set required network settings (VLAN0) in Unifi dashboard
 - [Test wpa_supplicant](#test-wpa_supplicant) - test wpasupplicant
-- [Setup wpa_supplicant service for startup](#setup-wpa_supplicant-service-for-startup) - start wpasupplicant on Unifi router bootup
+- [Setup wpa_supplicant service for startup](#setup-wpa_supplicant-service-for-startup) - start wpasupplicant on Unifi gateway bootup
 - [Survive firmware updates](#survive-firmware-updates) - automatically restore and setup wpasupplicant after firmware updates wipe it
 
 ## Install wpa_supplicant on Unifi gateway
@@ -28,7 +28,7 @@ SSH into your Unifi gateway.
 
 > Unlike all my other Unifi devices, my SSH private key didn't work with my username, but worked with the `root` user instead. Or user + password defined in `Settings` -> `System` -> `Advanced` -> `Device Authentication`.
 
-Unifi OS is a Debian-based distro, so we can install the `wpasupplicant` package.
+The Unifi gateways run a Debian-based distro, so we can install the `wpasupplicant` package.
 ```
 > apt update -y
 > apt install -y wpasupplicant
