@@ -3,6 +3,9 @@ Use this guide to setup wpa_supplicant with your Unifi OS gateway/router to bypa
 
 This guide was written specifically for the UXG Lite.
 This should also work on other Unifi OS devices, just may have to replace the interface name with the device's WAN port interface.
+Here are some known interfaces for other Unifi routers, for use in the rest of the guide
+- UCG Ultra - eth4
+- UXG Max - eth4
 
 > NOTE: Take note of your Unifi router's WAN port interface name. In the rest of the guide, I'll be using `eth1` because that is the WAN interface for the UXG Lite. If using another device, replace the interface name appropriately.
 
