@@ -7,6 +7,7 @@ Here are some known interfaces for Unifi OS routers, for use in the rest of the 
 - UXG Lite - eth1
 - UXG Max - eth4
 - UCG Ultra - eth4
+- UDM Pro - eth8 (WAN1), eth9 (WAN2)
 
 ### Prerequisites:
 - extracted and decoded certificates from an ATT modem
