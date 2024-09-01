@@ -10,7 +10,7 @@ Here are some known interfaces for Unifi gateways, for use in the rest of the gu
 - UXG Pro - eth0 (WAN1, RJ-45), eth2 (WAN2, SFP+)
 - UXG Max - eth4
 - UCG Ultra - eth4
-- UDR - eth4
+- UDR and UDM-Base (the egg) - eth4
 - UDM Pro or SE - eth8 (WAN1, RJ-45), eth9 (WAN2, SFP+)
 
 ### Prerequisites:
