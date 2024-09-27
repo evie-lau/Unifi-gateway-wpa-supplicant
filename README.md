@@ -194,12 +194,15 @@ Description=Reinstall and start/enable wpa_supplicant
 AssertPathExistsGlob=/etc/wpa_supplicant/packages/wpasupplicant*arm64.deb
 AssertPathExistsGlob=/etc/wpa_supplicant/packages/libpcsclite1*arm64.deb
 ConditionPathExists=!/sbin/wpa_supplicant
+After=basic.target sysinit.target
+Wants=basic.target sysinit.target
 
 [Service]
 Type=oneshot
 ExecStartPre=/bin/sh -c 'dpkg -Ri /etc/wpa_supplicant/packages'
 ExecStart=/bin/sh -c 'systemctl start wpa_supplicant-wired@eth1'
 ExecStartPost=/bin/sh -c 'systemctl enable wpa_supplicant-wired@eth1'
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
