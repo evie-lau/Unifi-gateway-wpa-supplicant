@@ -1,9 +1,10 @@
 # Unifi Gateway wpa_supplicant bypass for ATT fiber modem
-Use this guide to setup wpa_supplicant with your Unifi gateway to bypass the ATT modem. 
+Use this guide to setup wpa_supplicant with your Unifi gateway to bypass the ATT modem.
 
 This will work on any modern [Unifi Console or Gateway](https://www.reddit.com/r/Ubiquiti/comments/1870ryr/unifi_gateways_explained_as_simple_as_possible/). To my knowledge, that includes everything except the original USG which will have a different process that is already well documented over the years (check [Additional resources](#additional-resources)).
 
-> NOTE: Take note of your Unifi gateway's WAN port interface name. In the rest of the guide, I'll be using `eth1` because that is the WAN interface for the UXG Lite. If using another Unifi gateway, replace the interface name appropriately.
+> [!IMPORTANT]
+> Take note of your Unifi gateway's WAN port interface name. In the rest of the guide, I'll be using `eth1` because that is the WAN interface for the UXG Lite. If using another Unifi gateway, replace the interface name appropriately.
 
 Here are some known interfaces for Unifi gateways, for use in the rest of the guide. Double check with your device to be sure.
 - UXG Lite or UX  - eth1
@@ -30,6 +31,7 @@ Instructions to [extract certs for newish BGW210](https://github.com/mozzarellat
 ## Install wpa_supplicant on Unifi gateway
 SSH into your Unifi gateway.
 
+> [!TIP]
 > Unlike all my other Unifi devices, my SSH private key didn't work with my username, but worked with the `root` user instead. Or user + password defined in `Settings` -> `System` -> `Advanced` -> `Device Authentication`.
 
 The Unifi gateways run a Debian-based distro, so we can install the `wpasupplicant` package.
@@ -131,6 +133,7 @@ eth1: CTRL-EVENT-EAP-PEER-ALT depth=0 DNS:aut03lsanca.lsanca.sbcglobal.net
 eth1: CTRL-EVENT-EAP-SUCCESS EAP authentication completed successfully
 eth1: CTRL-EVENT-CONNECTED - Connection to XX:XX:XX:XX:XX:XX completed [id=0 id_str=]
 ```
+> [!TIP]
 > If you don't see the `EAP authentication completed successfully` message, try checking to make sure the MAC address was spoofed successfully.
 
 `Ctrl-c` to exit. If you would like to run it in the background for temporary internet access, add a `-B` parameter to the command. Running this command is still a manual process to authenticate, and it will only last until the next reboot.
