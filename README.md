@@ -61,7 +61,8 @@ These files come from the mfg_dat_decode tool:
 > scp wpa_supplicant.conf <gateway>:/etc/wpa_supplicant
 ```
 
-Make sure in the `wpa_supplicant.conf` to modify the `ca_cert`, `client_cert` and `private_key` to use absolute paths. In this case, prepend `/etc/wpa_supplicant/certs/` to the filename strings. It should look like the following...
+> [!IMPORTANT]
+Make sure in the `wpa_supplicant.conf` to modify the `ca_cert`, `client_cert` and `private_key` to use **absolute paths**. In this case, prepend `/etc/wpa_supplicant/certs/` to the filename strings. It should look like the following...
 ```
 ...
 network={
@@ -108,7 +109,8 @@ ATT authenticates using VLAN ID 0, so we have to tag our WAN port with that.
 
 In your Unifi console/dashboard, under `Settings` -> `Internet` -> `Primary (WAN1)` (or your WAN name if you renamed it), Enable `VLAN ID` and set it to `0`.
 
-Before applying, note that this change will prevent you from accessing the internet until after running `wpa_supplicant` in the next step. If you need to restore internet access before finishing this setup guide, you can always disable `VLAN ID`.
+> [!WARNING]
+> Before applying, note that this change will prevent you from accessing the internet until after running `wpa_supplicant` in the next step. If you need to restore internet access before finishing this setup guide, you can always disable `VLAN ID`.
 
 ![Alt text](vlan0.png)
 
@@ -237,6 +239,28 @@ Active: active (running) ...
 Dec 29 23:20:00 UXG-Lite wpa_supplicant[6845]: eth1: CTRL-EVENT-EAP-SUCCESS EAP authentication completed successfully
 ```
 </details>
+
+## File list
+For my own sanity, here's a final list of files created or copied into the gateway during this guide:
+
+```
+etc
+├── network
+│   └── if-up.d
+│       └── **changemac** (if needed for MAC spoof)
+├── systemd
+│   └── system
+│       └── **reinstall-wpa.service**
+└── wpa_supplicant
+    ├── **wpa_supplicant-wired-eth1.conf**
+    ├── certs
+    │   ├── CA_XXX.pem
+    │   ├── Client_XXX.pem
+    │   └── PrivateKey_PKCS1_XXX.pem
+    └── packages
+        ├── wpasupplicant_..._arm64.deb
+        └── libpcsclite1_..._arm64.deb
+```
 
 ## Troubleshooting
 
