@@ -217,7 +217,7 @@ Now enable the service.
 > systemctl daemon-reload
 > systemctl enable reinstall-wpa.service
 ```
-This service should run on startup. It will check if `/sbin/wpasupplicant` got wiped, and if our package files exist. If both are true, it will install and startup wpa_supplicant.
+This service should run on startup. It will check if `/sbin/wpa_supplicant` got wiped, and if our package files exist. If both are true, it will install and startup wpa_supplicant.
 
 <details>
 <summary><h3>(Optional) If you want to test this...</h3></summary>
