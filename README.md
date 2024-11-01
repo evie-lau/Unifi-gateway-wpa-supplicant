@@ -17,7 +17,7 @@ Here are some known interfaces for Unifi gateways, for use in the rest of the gu
 ### Prerequisites:
 - extracted and decoded certificates from an ATT modem
 
-Instructions to [extract certs for newish BGW210](https://github.com/mozzarellathicc/attcerts)
+Instructions to [extract certs from BGW210/BGW320](https://github.com/0x888e/certs)
 
 ## Table of Contents
 - [Install wpa_supplicant](#install-wpa_supplicant-on-unifi-gateway) - install wpasupplicant on your Unifi gateway
