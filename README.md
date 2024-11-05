@@ -76,7 +76,9 @@ network={
 ## Spoof MAC address
 We'll need to spoof the MAC address on the WAN port (interface `eth1` on the UXG-Lite) to successfully authenticate with ATT with our certificates.
 
-I know there's an option in the Unifi dashboard to spoof MAC address on the Internet (WAN) network, but this didn't seem to work when I tested it. (If anyone does test this successfully without needing the following, please let me know).
+> [!TIP]
+> I know there's an option in the Unifi dashboard to spoof MAC address on the Internet (WAN) network, but this didn't seem to work when I tested it.
+> If the setting works for you, the rest of this section can be skipped.
 
 Instead, I had to manually set it up, based on these [instructions to spoof mac address](https://www.xmodulo.com/spoof-mac-address-network-interface-linux.html).
 
