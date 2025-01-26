@@ -201,8 +201,8 @@ Description=Reinstall and start/enable wpa_supplicant
 AssertPathExistsGlob=/etc/wpa_supplicant/packages/wpasupplicant*arm64.deb
 AssertPathExistsGlob=/etc/wpa_supplicant/packages/libpcsclite1*arm64.deb
 ConditionPathExists=!/sbin/wpa_supplicant
-After=network-online.target multi-user.target
-Requires=network-online.target multi-user.target
+After=network-online.target
+Requires=network-online.target
 
 [Service]
 Type=oneshot
