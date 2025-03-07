@@ -23,7 +23,7 @@ Instructions to [extract certs from BGW210/BGW320](https://github.com/0x888e/cer
 - [Install wpa_supplicant](#install-wpa_supplicant-on-unifi-gateway) - install wpasupplicant on your Unifi gateway
 - [Copy certs and config](#copy-certs-and-config-to-unifi-gateway) - copy files generated from mfg_dat_decode tool into Unifi gateway
 - [Spoof MAC Address](#spoof-mac-address) - spoof Unifi WAN port to match original ATT gateway MAC address
-- [Setup network](#setup-network) - set required network settings (VLAN0) in Unifi dashboard
+- [Set Unifi network settings](#set-unifi-network-settings) - set required network settings (VLAN0) in Unifi dashboard
 - [Test wpa_supplicant](#test-wpa_supplicant) - test wpasupplicant
 - [Setup wpa_supplicant service for startup](#setup-wpa_supplicant-service-for-startup) - start wpasupplicant on Unifi gateway bootup
 - [Survive firmware updates](#survive-firmware-updates) - automatically restore and setup wpasupplicant after firmware updates wipe it
@@ -76,11 +76,12 @@ network={
 ## Spoof MAC address
 We'll need to spoof the MAC address on the WAN port (interface `eth1` on the UXG-Lite) to successfully authenticate with ATT with our certificates.
 
-> [!TIP]
-> I know there's an option in the Unifi dashboard to spoof MAC address on the Internet (WAN) network, but this didn't seem to work when I tested it.
-> If the setting works for you, the rest of this section can be skipped.
+In the Unifi dashboard, go to `Settings` -> `Internet` and select your WAN. Enable `MAC Address Clone` and paste the MAC address with your ATT gateway's address.
 
-Instead, I had to manually set it up, based on these [instructions to spoof mac address](https://www.xmodulo.com/spoof-mac-address-network-interface-linux.html).
+> [!TIP]
+> If the above setting works for you, the rest of this section can be skipped.
+
+Using the Unifi dashboard didn't seem to work for me (did not test extensively), and I had to manually set it up instead, based on these [instructions to spoof mac address](https://www.xmodulo.com/spoof-mac-address-network-interface-linux.html).
 
 SSH back into your gateway, and create the following file.
 
@@ -104,7 +105,10 @@ This file will spoof your WAN mac address when `eth1` starts up. Go ahead and ru
 > ip link set dev "$IFACE" address XX:XX:XX:XX:XX:XX
 ```
 
-## Setup network
+## Set Unifi network settings
+
+> [!CAUTION]
+> This section may not be applicable depending on your hardware configuration, especially if using an SFP bypass module.
 
 ### Set VLAN ID on WAN connection
 ATT authenticates using VLAN ID 0, so we have to tag our WAN port with that.
@@ -127,6 +131,9 @@ Breaking down this command...
 - `-i eth1` Specifies `eth1` (UXG-Lite WAN port) as the interface
 - `-D wired` Specify driver type of `eth1`
 - `-c <path-to>/wpa_supplicant.conf` The config file
+
+> [!TIP]
+> If troubleshooting is needed, add the parameter `-C /var/run/wpa_supplicant -B` to run in the background and allow `wpa_cli` to connect for more information.
 
 You should see the message `Successfully initialized wpa_supplicant` if the command and config are configured correctly.
 
