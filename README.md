@@ -61,7 +61,7 @@ These files come from the mfg_dat_decode tool:
 > scp wpa_supplicant.conf <gateway>:/etc/wpa_supplicant
 ```
 
-> [!IMPORTANT]
+> [!WARNING]
 Make sure in the `wpa_supplicant.conf` to modify the `ca_cert`, `client_cert` and `private_key` to use **absolute paths**. In this case, prepend `/etc/wpa_supplicant/certs/` to the filename strings. It should look like the following...
 ```
 ...
@@ -133,7 +133,9 @@ Breaking down this command...
 - `-c <path-to>/wpa_supplicant.conf` The config file
 
 > [!TIP]
-> If troubleshooting is needed, add the parameter `-C /var/run/wpa_supplicant -B` to run in the background and allow `wpa_cli` to connect for more information.
+> If troubleshooting is needed, add the parameter `-C /var/run/wpa_supplicant -B` to run in the background and allow the `wpa_cli` utility to connect.
+>
+> This can also be achieved in the `wpa_supplicant.conf` file by adding the line `ctrl_interface=DIR=/var/run/wpa_supplicant`, which will also apply when we later have wpa_supplicant service run automatically.
 
 You should see the message `Successfully initialized wpa_supplicant` if the command and config are configured correctly.
 
