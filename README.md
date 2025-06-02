@@ -240,7 +240,7 @@ This service should run on startup. It will check if `/sbin/wpa_supplicant` got 
 ```
 
 Now try restarting your gateway. Upon boot up, SSH back in, and check `systemctl status wpa_supplicant-wired@eth1`.
-- Alternatively, without a restart, run `systemctl start reinstall.service`, wait until it finishes, then `systemctl status wpa_supplicant-wired@eth1`.)
+- Alternatively, without a restart, run `systemctl start reinstall-wpa.service`, wait until it finishes, then `systemctl status wpa_supplicant-wired@eth1`.)
 
 You should see the following:
 ```
