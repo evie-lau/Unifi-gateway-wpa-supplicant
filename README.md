@@ -179,9 +179,9 @@ Now we can go ahead and enable the service.
 
 Try restarting your Unifi gateway if you wish, and it should automatically authenticate!
 
-If WAN doesn't come back up after a restart, it may be that wpa_supplicant is starting too soon. In that case, adding a 30s "sleep" has helped for some.
+If WAN doesn't come back up after a restart, it may be that wpa_supplicant is starting too soon. In that case, adding a 10s "sleep" has helped for some. Note: 10s has been tested successfully on a UDM Pro. If you have other hardware and WAN does not come back up, I suggest you incrementally increase from 10s until a restart results in your WAN connection coming back up successfully.
 ```
-> grep -q "ExecStartPre" /lib/systemd/system/wpa_supplicant-wired\@.service || sed -i "/Type\=simple/a ExecStartPre=/bin/sleep 30" /lib/systemd/system/wpa_supplicant-wired\@.service
+> grep -q "ExecStartPre" /lib/systemd/system/wpa_supplicant-wired\@.service || sed -i "/Type\=simple/a ExecStartPre=/bin/sleep 10" /lib/systemd/system/wpa_supplicant-wired\@.service
 ```
 
 ## Survive firmware updates
@@ -221,8 +221,8 @@ Requires=network-online.target
 [Service]
 Type=oneshot
 ExecStartPre=/bin/sh -c 'dpkg -Ri /etc/wpa_supplicant/packages'
-# If you needed 30s sleep for wpa_supplicant to work on restart, uncomment the following line to persist that setting
-# ExecStartPre=/bin/sh -c 'grep -q "ExecStartPre" /lib/systemd/system/wpa_supplicant-wired\@.service || sed -i "/Type\=simple/a ExecStartPre=/bin/sleep 30" /lib/systemd/system/wpa_supplicant-wired\@.service'
+# If you needed to add a sleep to your wpa_supplicant service startup to successfully restore your WAN connection on restart, uncomment the following line (and update 10s to whatever timing worked for you) to persist that setting
+# ExecStartPre=/bin/sh -c 'grep -q "ExecStartPre" /lib/systemd/system/wpa_supplicant-wired\@.service || sed -i "/Type\=simple/a ExecStartPre=/bin/sleep 10" /lib/systemd/system/wpa_supplicant-wired\@.service'
 ExecStart=/bin/sh -c 'systemctl start wpa_supplicant-wired@eth1'
 ExecStartPost=/bin/sh -c 'systemctl enable wpa_supplicant-wired@eth1'
 Restart=on-failure
