@@ -221,7 +221,7 @@ Requires=network-online.target
 [Service]
 Type=oneshot
 ExecStartPre=/bin/sh -c 'dpkg -Ri /etc/wpa_supplicant/packages'
-# If you needed to add a sleep to your wpa_supplicant service startup to successfully restore your WAN connection on restart, uncomment the following line (and update 10s to whatever timing worked for you) to persist that setting
+# If you needed to add a sleep to your wpa_supplicant service startup to successfully restore your WAN connection on restart, uncomment the following line (and update "sleep 10" to "sleep <whatever_timing_worked_for_you>") to persist that setting
 # ExecStartPre=/bin/sh -c 'grep -q "ExecStartPre" /lib/systemd/system/wpa_supplicant-wired\@.service || sed -i "/Type\=simple/a ExecStartPre=/bin/sleep 10" /lib/systemd/system/wpa_supplicant-wired\@.service'
 ExecStart=/bin/sh -c 'systemctl start wpa_supplicant-wired@eth1'
 ExecStartPost=/bin/sh -c 'systemctl enable wpa_supplicant-wired@eth1'
