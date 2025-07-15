@@ -109,6 +109,8 @@ This file will spoof your WAN mac address when `eth1` starts up. Go ahead and ru
 
 > [!CAUTION]
 > This section may not be applicable depending on your hardware configuration, especially if using an SFP bypass module.
+>
+> VLAN 0 seems to be necessary if you use the ATT external ONT. Otherwise, this step may not be needed.
 
 ### Set VLAN ID on WAN connection
 ATT authenticates using VLAN ID 0, so we have to tag our WAN port with that.
