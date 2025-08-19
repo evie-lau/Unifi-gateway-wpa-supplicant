@@ -35,10 +35,28 @@ SSH into your Unifi gateway.
 > Unlike all my other Unifi devices, my SSH private key didn't work with my username, but worked with the `root` user instead. Or user + password defined in `Settings` -> `System` -> `Advanced` -> `Device Authentication`.
 
 The Unifi gateways run a Debian-based distro, so we can install the `wpasupplicant` package.
+
+> [!WARNING]
+> Some devices such as the UDR7 and UX7 may get a version of wpasupplicant from `apt install` that does not include the wired driver. If you encounter issues with the standard installation below, use the [alternative installation method](#alternative-installation-for-udr7ux7-and-other-devices) instead.
+
 ```
 > apt update -y
 > apt install -y wpasupplicant
 ```
+
+### Alternative installation for UDR7/UX7 and other devices
+If the standard `apt install` method doesn't work for your device (you'll know if `wpa_supplicant` fails with driver issues), download and install the packages directly from the Debian repositories instead:
+
+```
+> mkdir -p /etc/wpa_supplicant/packages
+> cd /etc/wpa_supplicant/packages
+> wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.9.0-21+deb11u2_arm64.deb
+> wget http://ftp.us.debian.org/debian/pool/main/p/pcsc-lite/libpcsclite1_1.9.1-1_arm64.deb
+> dpkg -i *.deb
+```
+
+> [!NOTE]
+> These are the same packages used in the [Survive firmware updates](#survive-firmware-updates) section, so if you use this method, you can skip downloading them again later.
 
 Create a `certs` folder in the `/etc/wpa_supplicant` folder.
 ```
@@ -194,6 +212,9 @@ Let's cache some files locally and create a system service to automatically rein
 First download the required packages (with missing dependencies) from debian into a persisted folder. These are the resources if you wish to pull the latest download links. Make sure to get the `arm64` package.
 - https://packages.debian.org/bullseye/arm64/wpasupplicant/download
 - https://packages.debian.org/bullseye/arm64/libpcsclite1/download
+
+> [!NOTE]
+> If you used the [alternative installation method](#alternative-installation-for-udr7ux7-and-other-devices) above, you already have these packages and can skip this download step.
 
 ```
 > mkdir -p /etc/wpa_supplicant/packages
