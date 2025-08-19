@@ -14,10 +14,13 @@ The `install.sh` script automates most of the manual setup process described in 
    - `wpa_supplicant.conf` (Configuration file)
    - `install.sh` (This script)
 
-### Transfer Files to Gateway
+### Download Files to Gateway
 ```bash
-# Copy all required files to your gateway
-scp install.sh *.pem wpa_supplicant.conf <gateway_ip>:~/
+# SSH into your gateway and download the script
+ssh <gateway_ip>
+wget https://raw.githubusercontent.com/evie-lau/Unifi-gateway-wpa-supplicant/main/install.sh
+# Note: You still need to transfer your certificate files (*.pem) and wpa_supplicant.conf
+# as these are device-specific and not in the repository
 ```
 
 ## Running the Script
