@@ -1,5 +1,10 @@
 # Install Script Usage Guide
 
+> [!CAUTION]
+> **EXPERIMENTAL SCRIPT**: This automated install script is experimental and has not been thoroughly tested across all UniFi gateway models and configurations. It is provided as-is for convenience but may require adjustments for your specific setup. **Use at your own risk.** 
+> 
+> For production environments or if you encounter issues, please use the manual installation method documented in the main README.
+
 ## Overview
 The `install.sh` script automates most of the manual setup process described in the main README. It handles device detection, package installation, configuration, and service setup while providing interactive prompts for required user inputs.
 

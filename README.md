@@ -5,6 +5,9 @@ This will work on any modern [Unifi Console or Gateway](https://www.reddit.com/r
 
 ## Automated Installation
 
+> [!WARNING]
+> **EXPERIMENTAL**: The automated install script is experimental and has not been thoroughly tested across all UniFi gateway models and configurations. Use at your own risk. For production environments, the manual installation method below is still recommended.
+
 **NEW**: An automated install script is now available to streamline the setup process!
 
 ### Quick Start with Install Script
