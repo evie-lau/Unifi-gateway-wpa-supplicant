@@ -3,6 +3,26 @@ Use this guide to setup wpa_supplicant with your Unifi gateway to bypass the ATT
 
 This will work on any modern [Unifi Console or Gateway](https://www.reddit.com/r/Ubiquiti/comments/1870ryr/unifi_gateways_explained_as_simple_as_possible/) running UniFi OS 3.x or 4.x. To my knowledge, that includes everything except the original USG which will have a different process that is already well documented over the years (check [Additional resources](#additional-resources)).
 
+## Manual Installation
+
+If you prefer to follow the manual process or need to troubleshoot, continue with the detailed guide below.
+
+> [!IMPORTANT]
+> Take note of your Unifi gateway's WAN port interface name. In the rest of the guide, I'll be using `eth1` because that is the WAN interface for the UXG Lite. If using another Unifi gateway, replace the interface name appropriately.
+
+Here are some known interfaces for Unifi gateways, for use in the rest of the guide. Double check with your device to be sure.
+- UXG Lite or UX  - eth1
+- UXG Pro - eth0 (WAN1, RJ-45), eth2 (WAN2, SFP+)
+- UXG Max - eth4
+- UCG Ultra - eth4
+- UDR and UDM-Base (the egg) - eth4
+- UDM Pro or SE - eth8 (WAN1, RJ-45), eth9 (WAN2, SFP+)
+
+### Prerequisites:
+- extracted and decoded certificates from an ATT modem
+
+Instructions to [extract certs from BGW210/BGW320](https://github.com/0x888e/certs)
+
 ## Automated Installation
 
 > [!WARNING]
@@ -40,26 +60,6 @@ The script will:
 - Physical cable connection
 
 📖 **[Detailed Install Script Guide](INSTALL_GUIDE.md)** - Complete usage instructions, troubleshooting, and examples
-
-### Manual Installation
-
-If you prefer to follow the manual process or need to troubleshoot, continue with the detailed guide below.
-
-> [!IMPORTANT]
-> Take note of your Unifi gateway's WAN port interface name. In the rest of the guide, I'll be using `eth1` because that is the WAN interface for the UXG Lite. If using another Unifi gateway, replace the interface name appropriately.
-
-Here are some known interfaces for Unifi gateways, for use in the rest of the guide. Double check with your device to be sure.
-- UXG Lite or UX  - eth1
-- UXG Pro - eth0 (WAN1, RJ-45), eth2 (WAN2, SFP+)
-- UXG Max - eth4
-- UCG Ultra - eth4
-- UDR and UDM-Base (the egg) - eth4
-- UDM Pro or SE - eth8 (WAN1, RJ-45), eth9 (WAN2, SFP+)
-
-### Prerequisites:
-- extracted and decoded certificates from an ATT modem
-
-Instructions to [extract certs from BGW210/BGW320](https://github.com/0x888e/certs)
 
 ## Table of Contents
 - [Automated Installation](#automated-installation) - **NEW**: Streamlined setup with install script
