@@ -39,7 +39,7 @@ The Unifi gateways run a Debian-based distro, so we can install the `wpasupplica
 > [!WARNING]
 > Some devices such as the UDR7 and UX7 may get a version of wpasupplicant from `apt install` that does not include the wired driver. If you encounter issues with the standard installation below, use the [alternative installation method](#alternative-installation-for-udr7ux7-and-other-devices) instead.
 
-```
+```bash
 > apt update -y
 > apt install -y wpasupplicant
 ```
@@ -47,7 +47,7 @@ The Unifi gateways run a Debian-based distro, so we can install the `wpasupplica
 ### Alternative installation for UDR7/UX7 and other devices
 If the standard `apt install` method doesn't work for your device (you'll know if `wpa_supplicant` fails with driver issues), download and install the packages directly from the Debian repositories instead:
 
-```
+```bash
 > mkdir -p /etc/wpa_supplicant/packages
 > cd /etc/wpa_supplicant/packages
 > wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.9.0-21+deb11u3_arm64.deb
@@ -59,7 +59,7 @@ If the standard `apt install` method doesn't work for your device (you'll know i
 > These are the same packages used in the [Survive firmware updates](#survive-firmware-updates) section, so if you use this method, you can skip downloading them again later.
 
 Create a `certs` folder in the `/etc/wpa_supplicant` folder.
-```
+```bash
 > mkdir -p /etc/wpa_supplicant/certs
 ```
 
@@ -74,14 +74,14 @@ These files come from the mfg_dat_decode tool:
 - PrivateKey_PKCS1_XXXXXX-XXXXXXXXXXXXXX.pem
 - wpa_supplicant.conf
 
-```
+```bash
 > scp *.pem <gateway>:/etc/wpa_supplicant/certs
 > scp wpa_supplicant.conf <gateway>:/etc/wpa_supplicant
 ```
 
 > [!WARNING]
 Make sure in the `wpa_supplicant.conf` to modify the `ca_cert`, `client_cert` and `private_key` to use **absolute paths**. In this case, prepend `/etc/wpa_supplicant/certs/` to the filename strings. It should look like the following...
-```
+```ini
 ...
 network={
         ca_cert="/etc/wpa_supplicant/certs/CA_XXXXXX-XXXXXXXXXXXXXX.pem"
@@ -105,7 +105,7 @@ SSH back into your gateway, and create the following file.
 
 `vi /etc/network/if-up.d/changemac`
 
-```
+```bash
 #!/bin/sh
 
 if [ "$IFACE" = eth1 ]; then
@@ -115,11 +115,11 @@ fi
 Replace the mac address with your gateway's address, found in the `wpa_supplicant.conf` file.
 
 Set the permissions:
-```
+```bash
 > sudo chmod 755 /etc/network/if-up.d/changemac
 ```
 This file will spoof your WAN mac address when `eth1` starts up. Go ahead and run the same command now so you don't have to reboot your gateway.
-```
+```bash
 > ip link set dev "$IFACE" address XX:XX:XX:XX:XX:XX
 ```
 
@@ -144,7 +144,7 @@ Apply the change, then unplug the ethernet cable from the ONT port on your ATT G
 
 ## Test wpa_supplicant
 While SSHed into the gateway, run this to test the authentication.
-```
+```bash
 > wpa_supplicant -i eth1 -D wired -c /etc/wpa_supplicant/wpa_supplicant.conf
 ```
 Breaking down this command...
@@ -179,13 +179,13 @@ Let's use wpa_supplicant's built in interface-specific service to enable it on s
 Because we need to specify the `wired` driver and `eth1` interface, the corresponding service will be `wpa_supplicant-wired@eth1.service`. This service is tied to a specific .conf file, so we will have to rename our config file.
 
 Back in `/etc/wpa_supplicant`, rename `wpa_supplicant.conf` to `wpa_supplicant-wired-eth1.conf`.
-```
+```bash
 > cd /etc/wpa_supplicant
 > mv wpa_supplicant.conf wpa_supplicant-wired-eth1.conf
 ```
 
 Then start the service and check the status.
-```
+```bash
 > systemctl start wpa_supplicant-wired@eth1
 
 > systemctl status wpa_supplicant-wired@eth1
@@ -193,14 +193,14 @@ Then start the service and check the status.
 If the service successfully started and is active, you should see similar logs as when we tested with the `wpa_supplicant` command.
 
 Now we can go ahead and enable the service.
-```
+```bash
 > systemctl enable wpa_supplicant-wired@eth1
 ```
 
 Try restarting your Unifi gateway if you wish, and it should automatically authenticate!
 
 If WAN doesn't come back up after a restart, it may be that wpa_supplicant is starting too soon. In that case, adding a 10s "sleep" has helped for some. Note: 10s has been tested successfully on a UDM Pro. If you have other hardware and WAN does not come back up, I suggest you incrementally increase from 10s until a restart results in your WAN connection coming back up successfully.
-```
+```bash
 > grep -q "ExecStartPre" /lib/systemd/system/wpa_supplicant-wired\@.service || sed -i "/Type\=simple/a ExecStartPre=/bin/sleep 10" /lib/systemd/system/wpa_supplicant-wired\@.service
 ```
 
@@ -216,7 +216,7 @@ First download the required packages (with missing dependencies) from debian int
 > [!NOTE]
 > If you used the [alternative installation method](#alternative-installation-for-udr7ux7-and-other-devices) above, you already have these packages and can skip this download step.
 
-```
+```bash
 > mkdir -p /etc/wpa_supplicant/packages
 > cd /etc/wpa_supplicant/packages
 > wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.9.0-21+deb11u3_arm64.deb
@@ -227,12 +227,12 @@ First download the required packages (with missing dependencies) from debian int
 
 Now let's create a service to install these packages and enable/start wpa_supplicant:
 
-```
+```bash
 > vi /etc/systemd/system/reinstall-wpa.service
 ```
 
 Paste this as the content:
-```
+```ini
 [Unit]
 Description=Reinstall and start/enable wpa_supplicant
 AssertPathExistsGlob=/etc/wpa_supplicant/packages/wpasupplicant*arm64.deb
@@ -254,7 +254,7 @@ Restart=on-failure
 WantedBy=multi-user.target
 ```
 Now enable the service.
-```
+```bash
 > systemctl daemon-reload
 > systemctl enable reinstall-wpa.service
 ```
@@ -263,7 +263,7 @@ This service should run on startup. It will check if `/sbin/wpa_supplicant` got 
 <details>
 <summary><h3>(Optional) If you want to test this...</h3></summary>
 
-```
+```bash
 > systemctl stop wpa_supplicant-wired@eth1
 > systemctl disable wpa_supplicant-wired@eth1
 > apt remove wpasupplicant -y
