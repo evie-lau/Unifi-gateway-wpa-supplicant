@@ -243,25 +243,32 @@ Requires=network-online.target
 
 [Service]
 Type=oneshot
-ExecStartPre=/bin/sh -c 'dpkg -Ri /etc/wpa_supplicant/packages'
+ExecStartPre=/usr/bin/dpkg -Ri /etc/wpa_supplicant/packages
 # If you needed to add a sleep to your wpa_supplicant service startup to successfully restore your WAN connection on restart, uncomment the following line (and update "sleep 10" to "sleep <whatever_timing_worked_for_you>") to persist that setting
 # ExecStartPre=/bin/sh -c 'grep -q "ExecStartPre" /lib/systemd/system/wpa_supplicant-wired\@.service || sed -i "/Type\=simple/a ExecStartPre=/bin/sleep 10" /lib/systemd/system/wpa_supplicant-wired\@.service'
-ExecStart=/bin/sh -c 'systemctl start wpa_supplicant-wired@eth1'
-ExecStartPost=/bin/sh -c 'systemctl enable wpa_supplicant-wired@eth1'
+ExecStart=/bin/systemctl start wpa_supplicant-wired@eth1
+ExecStartPost=/bin/systemctl enable wpa_supplicant-wired@eth1
+
 Restart=on-failure
+RestartSec=20
+
+# Allow up to 10 attempts within ~300 seconds
+StartLimitIntervalSec=300
+StartLimitBurst=10
 
 [Install]
 WantedBy=multi-user.target
 ```
+
 Now enable the service.
 ```bash
 > systemctl daemon-reload
 > systemctl enable reinstall-wpa.service
 ```
-This service should run on startup. It will check if `/sbin/wpa_supplicant` got wiped, and if our package files exist. If both are true, it will install and startup wpa_supplicant.
+This service should run on startup. It will check if `/sbin/wpa_supplicant` got wiped, and if our package files exist. If both are true, it will install and startup wpa_supplicant. If `dpkg` or starting `wpa_supplicant` fail, the service will retry every 20 seconds up to 10 times.
 
 <details>
-<summary><h3>(Optional) If you want to test this...</h3></summary>
+<summary><h3>(Optional) If you want to test this, click here...</h3></summary>
 
 ```bash
 > systemctl stop wpa_supplicant-wired@eth1
