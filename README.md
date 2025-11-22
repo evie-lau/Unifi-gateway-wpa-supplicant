@@ -252,7 +252,7 @@ ExecStartPost=/bin/systemctl enable wpa_supplicant-wired@eth1
 Restart=on-failure
 RestartSec=20
 
-# Allow up to 10 attempts within ~200 seconds
+# Allow up to 10 attempts within ~300 seconds
 StartLimitIntervalSec=300
 StartLimitBurst=10
 
