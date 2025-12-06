@@ -199,9 +199,34 @@ Now we can go ahead and enable the service.
 
 Try restarting your Unifi gateway if you wish, and it should automatically authenticate!
 
-If WAN doesn't come back up after a restart, it may be that wpa_supplicant is starting too soon. In that case, adding a 10s "sleep" has helped for some. Note: 10s has been tested successfully on a UDM Pro. If you have other hardware and WAN does not come back up, I suggest you incrementally increase from 10s until a restart results in your WAN connection coming back up successfully.
+### Add failure tolerance to wpa_supplicant
+If WAN doesn't come back up after a restart, it may be that wpa_supplicant is starting too soon. Regardless, we can configure a retry for the wpa_supplicant service.
+
 ```bash
-> grep -q "ExecStartPre" /lib/systemd/system/wpa_supplicant-wired\@.service || sed -i "/Type\=simple/a ExecStartPre=/bin/sleep 10" /lib/systemd/system/wpa_supplicant-wired\@.service
+> vi /etc/systemd/system/wpa_supplicant-wired@.service.d/restart-on-failure.conf
+```
+
+```ini
+[Unit]
+# Allow up to 10 attempts within a 3 minute window
+StartLimitIntervalSec=180
+StartLimitBurst=10
+
+[Service]
+# Enable restarting on failure
+Restart=on-failure
+# Wait 10 seconds between restart attempts
+RestartSec=10
+```
+
+This `.conf` file specifying the retries will tie into the wpa_supplicant-wired services, regardless of the eth number port.
+
+To confirm this conf has applied, restart the service and query for some properties. You should at least see `Restart=on-failure` from the query.
+
+```bash
+> systemctl daemon-reload
+> systemctl restart wpa_supplicant-wired@eth1.service
+> systemctl show wpa_supplicant-wired@eth1.service -p Restart -p RestartSec
 ```
 
 ## Survive firmware updates
@@ -238,23 +263,22 @@ Description=Reinstall and start/enable wpa_supplicant
 AssertPathExistsGlob=/etc/wpa_supplicant/packages/wpasupplicant*arm64.deb
 AssertPathExistsGlob=/etc/wpa_supplicant/packages/libpcsclite1*arm64.deb
 ConditionPathExists=!/sbin/wpa_supplicant
+
 After=network-online.target
 Requires=network-online.target
+
+# Allow up to 10 attempts within ~300 seconds
+StartLimitIntervalSec=300
+StartLimitBurst=10
 
 [Service]
 Type=oneshot
 ExecStartPre=/usr/bin/dpkg -Ri /etc/wpa_supplicant/packages
-# If you needed to add a sleep to your wpa_supplicant service startup to successfully restore your WAN connection on restart, uncomment the following line (and update "sleep 10" to "sleep <whatever_timing_worked_for_you>") to persist that setting
-# ExecStartPre=/bin/sh -c 'grep -q "ExecStartPre" /lib/systemd/system/wpa_supplicant-wired\@.service || sed -i "/Type\=simple/a ExecStartPre=/bin/sleep 10" /lib/systemd/system/wpa_supplicant-wired\@.service'
 ExecStart=/bin/systemctl start wpa_supplicant-wired@eth1
 ExecStartPost=/bin/systemctl enable wpa_supplicant-wired@eth1
 
 Restart=on-failure
 RestartSec=20
-
-# Allow up to 10 attempts within ~300 seconds
-StartLimitIntervalSec=300
-StartLimitBurst=10
 
 [Install]
 WantedBy=multi-user.target
@@ -277,7 +301,7 @@ This service should run on startup. It will check if `/sbin/wpa_supplicant` got 
 ```
 
 Now try restarting your gateway. Upon boot up, SSH back in, and check `systemctl status wpa_supplicant-wired@eth1`.
-- Alternatively, without a restart, run `systemctl start reinstall-wpa.service`, wait until it finishes, then `systemctl status wpa_supplicant-wired@eth1`.)
+- Alternatively, without a restart, run `systemctl start reinstall-wpa.service`, wait until it finishes, then `systemctl status wpa_supplicant-wired@eth1`.
 
 You should see the following:
 ```
@@ -297,8 +321,10 @@ etc
 │   └── if-up.d
 │       └── **changemac** (if needed for MAC spoof)
 ├── systemd
-│   └── system
-│       └── **reinstall-wpa.service**
+│   ├── system
+│   │   └── **reinstall-wpa.service**
+│   └── wpa_supplicant-wired@.service.d
+│       └── **restart-on-failure.conf**
 └── wpa_supplicant
     ├── **wpa_supplicant-wired-eth1.conf**
     ├── certs
