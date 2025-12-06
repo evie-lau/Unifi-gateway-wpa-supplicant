@@ -50,7 +50,7 @@ If the standard `apt install` method doesn't work for your device (you'll know i
 ```bash
 > mkdir -p /etc/wpa_supplicant/packages
 > cd /etc/wpa_supplicant/packages
-> wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.9.0-21+deb11u3_arm64.deb
+> wget http://security.debian.org/debian-security/pool/updates/main/w/wpa/wpasupplicant_2.9.0-21+deb11u3_arm64.deb
 > wget http://ftp.us.debian.org/debian/pool/main/p/pcsc-lite/libpcsclite1_1.9.1-1_arm64.deb
 > dpkg -i *.deb
 ```
@@ -219,7 +219,7 @@ First download the required packages (with missing dependencies) from debian int
 ```bash
 > mkdir -p /etc/wpa_supplicant/packages
 > cd /etc/wpa_supplicant/packages
-> wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.9.0-21+deb11u3_arm64.deb
+> wget http://security.debian.org/debian-security/pool/updates/main/w/wpa/wpasupplicant_2.9.0-21+deb11u3_arm64.deb
 > wget http://ftp.us.debian.org/debian/pool/main/p/pcsc-lite/libpcsclite1_1.9.1-1_arm64.deb
 ```
 
