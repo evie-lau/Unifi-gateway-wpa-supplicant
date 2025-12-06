@@ -216,11 +216,18 @@ StartLimitBurst=10
 # Enable restarting on failure
 Restart=on-failure
 # Wait 10 seconds between restart attempts
-RestartSec=10s
+RestartSec=10
 ```
 
 This `.conf` file specifying the retries will tie in to the wpa_supplicant-wired services, regardless of the eth number port.
 
+To confirm this conf has applied, restart the service and query for some properties. You should at least see `Restart=on-failure` from the query.
+
+```bash
+> systemctl daemon-reload
+> systemctl restart wpa_supplicant-wired@eth1.service
+> systemctl show wpa_supplicant-wired@eth1.service -p Restart -p RestartSec
+```
 
 ## Survive firmware updates
 Firmware updates will nuke the packages installed through `apt` that don't come with the stock Unifi OS, removing our `wpasupplicant` package and service. Since we'll no longer have internet without wpa_supplicant authenticating us with ATT, we can't reinstall it from the debian repos.
@@ -294,7 +301,7 @@ This service should run on startup. It will check if `/sbin/wpa_supplicant` got 
 ```
 
 Now try restarting your gateway. Upon boot up, SSH back in, and check `systemctl status wpa_supplicant-wired@eth1`.
-- Alternatively, without a restart, run `systemctl start reinstall-wpa.service`, wait until it finishes, then `systemctl status wpa_supplicant-wired@eth1`.)
+- Alternatively, without a restart, run `systemctl start reinstall-wpa.service`, wait until it finishes, then `systemctl status wpa_supplicant-wired@eth1`.
 
 You should see the following:
 ```
