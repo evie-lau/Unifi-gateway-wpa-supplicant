@@ -209,7 +209,7 @@ If WAN doesn't come back up after a restart, it may be that wpa_supplicant is st
 ```ini
 [Unit]
 # Allow up to 10 attempts within a 3 minute window
-StartLimitIntervalSec=3min
+StartLimitIntervalSec=180
 StartLimitBurst=10
 
 [Service]
@@ -219,7 +219,7 @@ Restart=on-failure
 RestartSec=10
 ```
 
-This `.conf` file specifying the retries will tie in to the wpa_supplicant-wired services, regardless of the eth number port.
+This `.conf` file specifying the retries will tie into the wpa_supplicant-wired services, regardless of the eth number port.
 
 To confirm this conf has applied, restart the service and query for some properties. You should at least see `Restart=on-failure` from the query.
 
