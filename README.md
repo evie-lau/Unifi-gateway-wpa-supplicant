@@ -53,7 +53,9 @@ apt install -y wpasupplicant
 ### Alternative installation for UDR7/UX7 and other devices
 If the standard `apt install` method doesn't work for your device (you'll know if `wpa_supplicant` fails with driver issues), download and install the packages directly from the Debian repositories instead:
 
-Pick the packages that match your gateway's Debian release (see the check above). Debian 11 (bullseye), UniFi OS 3.x and 4.x:
+Pick the packages that match your gateway's Debian release (see the check above). 
+
+#### Debian 11 (bullseye), UniFi OS 3.x and 4.x:
 
 ```bash
 mkdir -p /etc/wpa_supplicant/packages
@@ -63,7 +65,7 @@ wget http://ftp.us.debian.org/debian/pool/main/p/pcsc-lite/libpcsclite1_1.9.1-1_
 dpkg -i *.deb
 ```
 
-Debian 13 (trixie), newer UniFi OS releases:
+#### Debian 13 (trixie), newer UniFi OS releases:
 
 ```bash
 mkdir -p /etc/wpa_supplicant/packages
