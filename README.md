@@ -3,6 +3,10 @@ Use this guide to setup wpa_supplicant with your Unifi gateway to bypass the ATT
 
 This will work on any modern [Unifi Console or Gateway](https://www.reddit.com/r/Ubiquiti/comments/1870ryr/unifi_gateways_explained_as_simple_as_possible/) running UniFi OS 3.x or 4.x. To my knowledge, that includes everything except the original USG which will have a different process that is already well documented over the years (check [Additional resources](#additional-resources)).
 
+## Manual Installation
+
+If you prefer to follow the manual process or need to troubleshoot, continue with the detailed guide below.
+
 > [!IMPORTANT]
 > Take note of your Unifi gateway's WAN port interface name. In the rest of the guide, I'll be using `eth1` because that is the WAN interface for the UXG Lite. If using another Unifi gateway, replace the interface name appropriately.
 
@@ -19,7 +23,46 @@ Here are some known interfaces for Unifi gateways, for use in the rest of the gu
 
 Instructions to [extract certs from BGW210/BGW320](https://github.com/0x888e/certs)
 
+## Automated Installation
+
+> [!WARNING]
+> **EXPERIMENTAL**: The automated install script is experimental and has not been thoroughly tested across all UniFi gateway models and configurations. Use at your own risk. For production environments, the manual installation method below is still recommended.
+
+**NEW**: An automated install script is now available to streamline the setup process!
+
+### Quick Start with Install Script
+
+1. Extract certificates from your ATT modem using [mfg_dat_decode tool](https://github.com/0x888e/certs)
+2. Upload the script and certificate files to your UniFi gateway
+3. Run the install script as root
+
+```bash
+# Copy install script and certificates to your gateway
+scp install.sh *.pem wpa_supplicant.conf <gateway>:~/
+
+# SSH into your gateway and run the script
+ssh <gateway>
+sudo ./install.sh
+```
+
+The script will:
+- ✅ Auto-detect your device type and suggest the correct interface
+- ✅ Install wpa_supplicant (standard or alternative method)
+- ✅ Set up all required directories and copy certificate files
+- ✅ Configure MAC address spoofing (manual or automatic)
+- ✅ Create and enable systemd services
+- ✅ Set up firmware update survival
+- ✅ Test the configuration
+
+**Manual steps still required:**
+- Certificate extraction from ATT modem (one-time, before script)
+- UniFi dashboard VLAN configuration (set VLAN ID to 0)
+- Physical cable connection
+
+📖 **[Detailed Install Script Guide](INSTALL_GUIDE.md)** - Complete usage instructions, troubleshooting, and examples
+
 ## Table of Contents
+- [Automated Installation](#automated-installation) - **NEW**: Streamlined setup with install script
 - [Install wpa_supplicant](#install-wpa_supplicant-on-unifi-gateway) - install wpasupplicant on your Unifi gateway
 - [Copy certs and config](#copy-certs-and-config-to-unifi-gateway) - copy files generated from mfg_dat_decode tool into Unifi gateway
 - [Spoof MAC Address](#spoof-mac-address) - spoof Unifi WAN port to match original ATT gateway MAC address
