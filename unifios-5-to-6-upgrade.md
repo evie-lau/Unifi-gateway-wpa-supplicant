@@ -33,8 +33,8 @@ wget https://deb.debian.org/debian/pool/main/p/pcsc-lite/libpcsclite1_2.3.3-1_ar
 
 If you currently do not have internet access on the gateway, find a way to download these onto your computer, then scp them into the gateway.
 
->[!NOTE]
->If a link is unavailable, choose the current `arm64` packages from the [trixie wpasupplicant](https://packages.debian.org/trixie/arm64/wpasupplicant/download) and [libpcsclite1](https://packages.debian.org/trixie/arm64/libpcsclite1/download) pages.
+> [!NOTE]
+> If a link is unavailable, choose the current `arm64` packages from the [trixie wpasupplicant](https://packages.debian.org/trixie/arm64/wpasupplicant/download) and [libpcsclite1](https://packages.debian.org/trixie/arm64/libpcsclite1/download) pages.
 
 Now upgrade the firmware. Hopefully you are done now.
 
