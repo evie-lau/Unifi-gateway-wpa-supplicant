@@ -1,7 +1,9 @@
 # Unifi Gateway wpa_supplicant bypass for ATT fiber modem
-Use this guide to setup wpa_supplicant with your Unifi gateway to bypass the ATT modem.
+Use this guide to setup wpa_supplicant with your Unifi gateway to bypass the ATT modem, and learn along the way.
 
-This guide's default instructions are for UniFi OS 6.x on Debian 13 (trixie). Older installations may still run Debian 11 (bullseye); check the gateway's Debian release below and use the legacy instructions where indicated. This should work on modern [Unifi Consoles or Gateways](https://www.reddit.com/r/Ubiquiti/comments/1870ryr/unifi_gateways_explained_as_simple_as_possible/) except the original USG, which has a different process (see [Additional resources](#additional-resources)).
+This guide's default instructions are now for UniFi OS 6.x on Debian 13 (trixie). Older installations may still run Debian 11 (bullseye); check the gateway's Debian release below and use the legacy instructions where indicated. This works on modern [Unifi Consoles or Gateways](https://www.reddit.com/r/Ubiquiti/comments/1870ryr/unifi_gateways_explained_as_simple_as_possible/) except the original USG, which has a different process (see [Additional resources](#additional-resources)).
+
+Moving an existing setup from UniFi OS 5 (Debian 11/Bullseye) to UniFi OS 6? Follow the [5-to-6 transition guide](./unifios-5-to-6-upgrade.md).
 
 > [!IMPORTANT]
 > Take note of your Unifi gateway's WAN port interface name. In the rest of the guide, I'll be using `eth1` because that is the WAN interface for the UXG Lite. If using another Unifi gateway, replace the interface name appropriately.
@@ -293,8 +295,8 @@ StartLimitBurst=10
 [Service]
 Type=oneshot
 ExecStartPre=/usr/bin/dpkg -Ri /etc/wpa_supplicant/packages
-ExecStart=/bin/systemctl start wpa_supplicant-wired@eth1
-ExecStartPost=/bin/systemctl enable wpa_supplicant-wired@eth1
+ExecStart=/usr/bin/systemctl start wpa_supplicant-wired@eth1
+ExecStartPost=/usr/bin/systemctl enable wpa_supplicant-wired@eth1
 
 Restart=on-failure
 RestartSec=20
