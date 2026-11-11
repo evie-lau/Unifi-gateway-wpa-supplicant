@@ -1,7 +1,7 @@
 # Unifi Gateway wpa_supplicant bypass for ATT fiber modem
 Use this guide to setup wpa_supplicant with your Unifi gateway to bypass the ATT modem.
 
-This will work on any modern [Unifi Console or Gateway](https://www.reddit.com/r/Ubiquiti/comments/1870ryr/unifi_gateways_explained_as_simple_as_possible/) running UniFi OS 3.x or 4.x. To my knowledge, that includes everything except the original USG which will have a different process that is already well documented over the years (check [Additional resources](#additional-resources)).
+This guide's default instructions are for UniFi OS 6.x on Debian 13 (trixie). Older installations may still run Debian 11 (bullseye); check the gateway's Debian release below and use the legacy instructions where indicated. This should work on modern [Unifi Consoles or Gateways](https://www.reddit.com/r/Ubiquiti/comments/1870ryr/unifi_gateways_explained_as_simple_as_possible/) except the original USG, which has a different process (see [Additional resources](#additional-resources)).
 
 > [!IMPORTANT]
 > Take note of your Unifi gateway's WAN port interface name. In the rest of the guide, I'll be using `eth1` because that is the WAN interface for the UXG Lite. If using another Unifi gateway, replace the interface name appropriately.
@@ -36,47 +36,46 @@ SSH into your Unifi gateway.
 
 The Unifi gateways run a Debian-based distro, so we can install the `wpasupplicant` package.
 
-> [!WARNING]
-> Some devices such as the UDR7 and UX7 may get a version of wpasupplicant from `apt install` that does not include the wired driver. If you encounter issues with the standard installation below, use the [alternative installation method](#alternative-installation-for-udr7ux7-and-other-devices) instead.
+Check the Debian release first. Use the trixie instructions for Debian 13 and the collapsed Bullseye instructions for Debian 11; don't rely on the UniFi OS version alone:
 
 ```bash
-apt update -y
-apt install -y wpasupplicant
+grep PRETTY_NAME /etc/os-release
 ```
 
-> [!IMPORTANT]
-> Newer UniFi OS releases are based on Debian 13 (trixie) with OpenSSL 3 instead of Debian 11 (bullseye). Check which one your gateway runs, because it decides which packages to cache later and whether you need the extra config line in [Copy certs and config](#copy-certs-and-config-to-unifi-gateway):
-> ```bash
-> grep PRETTY_NAME /etc/os-release; openssl version
-> ```
+If it reports a release other than Debian 13 or Debian 11, stop and use packages built for that Debian release.
 
-### Alternative installation for UDR7/UX7 and other devices
-If the standard `apt install` method doesn't work for your device (you'll know if `wpa_supplicant` fails with driver issues), download and install the packages directly from the Debian repositories instead:
+Download the Debian packages directly. This avoids relying on whether the packages in your device's configured repositories include the wired driver. Keep these files in `/etc/wpa_supplicant/packages` for the reinstall service described in [Survive firmware updates](#survive-firmware-updates).
 
-Pick the packages that match your gateway's Debian release (see the check above). 
-
-#### Debian 11 (bullseye), UniFi OS 3.x and 4.x:
+**Debian 13 (trixie) — default for UniFi OS 6.x:**
 
 ```bash
 mkdir -p /etc/wpa_supplicant/packages
 cd /etc/wpa_supplicant/packages
-wget http://security.debian.org/debian-security/pool/updates/main/w/wpa/wpasupplicant_2.9.0-21+deb11u3_arm64.deb
-wget http://ftp.us.debian.org/debian/pool/main/p/pcsc-lite/libpcsclite1_1.9.1-1_arm64.deb
-dpkg -i *.deb
+rm -f ./*.deb
+wget https://deb.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.10-24_arm64.deb
+wget https://deb.debian.org/debian/pool/main/p/pcsc-lite/libpcsclite1_2.3.3-1_arm64.deb
+dpkg -i ./*.deb
 ```
 
-#### Debian 13 (trixie), newer UniFi OS releases:
+Debian package versions can change. If either link is unavailable, choose the current `arm64` package from the [trixie wpasupplicant](https://packages.debian.org/trixie/arm64/wpasupplicant/download) or [libpcsclite1](https://packages.debian.org/trixie/arm64/libpcsclite1/download) page.
+
+<details>
+<summary>Legacy: Debian 11 (bullseye)</summary>
+
+For gateways confirmed to run Debian 11, use these packages instead:
 
 ```bash
 mkdir -p /etc/wpa_supplicant/packages
 cd /etc/wpa_supplicant/packages
-wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.10-24_arm64.deb
-wget http://ftp.us.debian.org/debian/pool/main/p/pcsc-lite/libpcsclite1_2.3.3-1_arm64.deb
-dpkg -i *.deb
+rm -f ./*.deb
+wget https://archive.debian.org/debian-security/pool/updates/main/w/wpa/wpasupplicant_2.9.0-21+deb11u3_arm64.deb
+wget https://deb.debian.org/debian/pool/main/p/pcsc-lite/libpcsclite1_1.9.1-1_arm64.deb
+dpkg -i ./*.deb
 ```
 
-> [!NOTE]
-> These are the same packages used in the [Survive firmware updates](#survive-firmware-updates) section, so if you use this method, you can skip downloading them again later. Keep only one release's packages in the folder, never both.
+</details>
+
+If `dpkg` reports a missing dependency, install the matching `arm64` dependency package from the same Debian release, then retry.
 
 Create a `certs` folder in the `/etc/wpa_supplicant` folder.
 ```bash
@@ -111,20 +110,16 @@ network={
 }
 ```
 
-> [!WARNING]
-> If your gateway runs Debian 13 (trixie) with OpenSSL 3, add this line to the **global** section of `wpa_supplicant.conf`, above `network={`, unquoted:
-> ```ini
-> openssl_ciphers=DEFAULT@SECLEVEL=0
-> ```
-> The ATT certificates are signed with SHA1, which OpenSSL 3 refuses at its default security level. Without this line, `wpa_supplicant` fails with `ca md too weak` and then asks for a private key passphrase that does not exist. See [Troubleshooting](#ca-md-too-weak). The line must be global. Putting `openssl_ciphers="..."` inside the `network={}` block does not work with wpa_supplicant 2.10, because that form is applied after the certificate has already been rejected. The config should then start like this:
-> ```ini
-> eapol_version=1
-> ap_scan=0
-> fast_reauth=1
-> openssl_ciphers=DEFAULT@SECLEVEL=0
-> network={
-> ...
-> ```
+For Debian 13 (trixie) with OpenSSL 3, add this unquoted line to the **global** section, before `network={`. The ATT certificates are SHA1-signed; OpenSSL 3 rejects them at its default security level. Do not put this setting inside `network={}`.
+
+```ini
+eapol_version=1
+ap_scan=0
+fast_reauth=1
+openssl_ciphers=DEFAULT@SECLEVEL=0
+network={
+...
+```
 
 ## Spoof MAC address
 We'll need to spoof the MAC address on the WAN port (interface `eth1` on the UXG-Lite) to successfully authenticate with ATT with our certificates.
@@ -265,43 +260,14 @@ systemctl show wpa_supplicant-wired@eth1.service -p Restart -p RestartSec
 ```
 
 ## Survive firmware updates
-Firmware updates will nuke the packages installed through `apt` that don't come with the stock Unifi OS, removing our `wpasupplicant` package and service. Since we'll no longer have internet without wpa_supplicant authenticating us with ATT, we can't reinstall it from the debian repos.
+Firmware updates may remove the manually installed `wpasupplicant` package and its service. Since the gateway may not have internet without wpa_supplicant authenticating with ATT, we need a local copy of the Debian packages to restore it.
 
-Let's cache some files locally and create a system service to automatically reinstall, start, and enable wpa_supplicant again on bootup.
-
-First download the required packages (with missing dependencies) from debian into a persisted folder. These are the resources if you wish to pull the latest download links. Make sure to get the `arm64` package for **your gateway's Debian release** (see the release check in [Install wpa_supplicant](#install-wpa_supplicant-on-unifi-gateway)).
-
-Debian 11 (bullseye):
-- https://packages.debian.org/bullseye/arm64/wpasupplicant/download
-- https://packages.debian.org/bullseye/arm64/libpcsclite1/download
-
-Debian 13 (trixie):
-- https://packages.debian.org/trixie/arm64/wpasupplicant/download
-- https://packages.debian.org/trixie/arm64/libpcsclite1/download
-
-> [!NOTE]
-> If you used the [alternative installation method](#alternative-installation-for-udr7ux7-and-other-devices) above, you already have these packages and can skip this download step.
-
-Debian 11 (bullseye):
-```bash
-mkdir -p /etc/wpa_supplicant/packages
-cd /etc/wpa_supplicant/packages
-wget http://security.debian.org/debian-security/pool/updates/main/w/wpa/wpasupplicant_2.9.0-21+deb11u3_arm64.deb
-wget http://ftp.us.debian.org/debian/pool/main/p/pcsc-lite/libpcsclite1_1.9.1-1_arm64.deb
-```
-
-Debian 13 (trixie):
-```bash
-mkdir -p /etc/wpa_supplicant/packages
-cd /etc/wpa_supplicant/packages
-wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.10-24_arm64.deb
-wget http://ftp.us.debian.org/debian/pool/main/p/pcsc-lite/libpcsclite1_2.3.3-1_arm64.deb
-```
+The package files downloaded during installation are cached in `/etc/wpa_supplicant/packages` for the reinstall service below. If a firmware update removes that folder, repeat the matching download and install commands in [Install wpa_supplicant](#install-wpa_supplicant-on-unifi-gateway) before enabling the reinstall service.
 
 > [!CAUTION]
-> Never keep packages from two Debian releases in this folder. The reinstall service below runs `dpkg -Ri` on the whole folder, which installs every `.deb` it finds. With a bullseye and a trixie `wpasupplicant` side by side, dpkg can downgrade a working 2.10 install to the 2.9 build, which cannot even run on trixie (it needs `libssl1.1`). After a UniFi OS update that changes the Debian release, rerun the release check, delete the old packages and download the matching ones.
+> Never keep packages from two Debian releases in this folder. The reinstall service below runs `dpkg -Ri` on the whole folder, which installs every `.deb` it finds. A Bullseye package cannot run on trixie (it needs `libssl1.1`). After a UniFi OS update that changes the Debian release, rerun the release check and replace the cached packages with ones matching the new release.
 
-> As of the 3.1.15 -> 3.1.16 firmware update, my `/etc/wpa_supplicant` folder did not get wiped, so these should persist through an update for us to reinstall.
+The persistence of these files can vary by device and firmware version. Check that the folder and service remain after firmware updates.
 
 Now let's create a service to install these packages and enable/start wpa_supplicant:
 
@@ -315,7 +281,7 @@ Paste this as the content:
 Description=Reinstall and start/enable wpa_supplicant
 AssertPathExistsGlob=/etc/wpa_supplicant/packages/wpasupplicant*arm64.deb
 AssertPathExistsGlob=/etc/wpa_supplicant/packages/libpcsclite1*arm64.deb
-ConditionPathExists=!/sbin/wpa_supplicant
+ConditionPathExists=!/usr/sbin/wpa_supplicant
 
 After=network-online.target
 Requires=network-online.target
@@ -342,7 +308,7 @@ Now enable the service.
 systemctl daemon-reload
 systemctl enable reinstall-wpa.service
 ```
-This service should run on startup. It will check if `/sbin/wpa_supplicant` got wiped, and if our package files exist. If both are true, it will install and startup wpa_supplicant. If `dpkg` or starting `wpa_supplicant` fail, the service will retry every 20 seconds up to 10 times.
+This service should run on startup. It checks whether `/usr/sbin/wpa_supplicant` is missing and whether the package files exist. If both conditions are met, it reinstalls and starts wpa_supplicant. If installation or startup fails, the service retries every 20 seconds up to 10 times.
 
 <details>
 <summary><h3>(Optional) If you want to test this, click here...</h3></summary>
@@ -358,7 +324,7 @@ Now try restarting your gateway. Upon boot up, SSH back in, and check `systemctl
 
 You should see the following:
 ```
-Loaded: loaded (/lib/systemd/system/wpa_supplicant-wired@.service; enabled; vendor preset: enabled)
+Loaded: loaded (/usr/lib/systemd/system/wpa_supplicant-wired@.service; enabled; vendor preset: enabled)
 Active: active (running) ...
 ...
 Dec 29 23:20:00 UXG-Lite wpa_supplicant[6845]: eth1: CTRL-EVENT-EAP-SUCCESS EAP authentication completed successfully
@@ -421,9 +387,9 @@ If it shows this:
 
     OpenSSL: tls_connection_client_cert - SSL_use_certificate_file failed error:0A00018E:SSL routines::ca md too weak
 
-your gateway now runs Debian 13 (trixie) with OpenSSL 3, which refuses the SHA1-signed ATT certificates at its default security level. This started happening after a UniFi OS update on setups that had worked for years. Fix: add the global `openssl_ciphers=DEFAULT@SECLEVEL=0` line described in [Copy certs and config](#copy-certs-and-config-to-unifi-gateway), then restart the service.
+your gateway now runs Debian 13 (trixie) with OpenSSL 3, which refuses the SHA1-signed ATT certificates at its default security level. Fix: add the global `openssl_ciphers=DEFAULT@SECLEVEL=0` line described in [Copy certs and config](#copy-certs-and-config-to-unifi-gateway), then restart the service.
 
-While you are there, run `dpkg -l wpasupplicant`. If it shows `rc` instead of `ii`, the package got removed (see the caution about mixed packages in [Survive firmware updates](#survive-firmware-updates)) and the `wpa_supplicant-wired@` service template is gone with it. Reinstall the trixie packages from `/etc/wpa_supplicant/packages` with `dpkg -i`, then start the service again.
+While you are there, run `dpkg -l wpasupplicant`. If it shows `rc` instead of `ii`, the package got removed (see the caution about mixed packages in [Survive firmware updates](#survive-firmware-updates)) and the `wpa_supplicant-wired@` service template is gone with it. Reinstall the packages matching your Debian release from `/etc/wpa_supplicant/packages` with `dpkg -i`, then start the service again.
 </details>
 
 ## Additional resources
