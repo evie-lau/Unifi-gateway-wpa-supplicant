@@ -36,6 +36,15 @@ If you currently do not have internet access on the gateway, find a way to downl
 > [!NOTE]
 > If a link is unavailable, choose the current `arm64` packages from the [trixie wpasupplicant](https://packages.debian.org/trixie/arm64/wpasupplicant/download) and [libpcsclite1](https://packages.debian.org/trixie/arm64/libpcsclite1/download) pages.
 
+3. In `/etc/systemd/system/reinstall-wpa.service`, change the path for the condition check.
+```
+...
+ConditionPathExists=!/usr/sbin/wpa_supplicant
+...
+```
+
+The old `/sbin` became a symlink in Debian 12 and should be updated to directly use `/usr/sbin`.
+
 Now upgrade the firmware. Hopefully you are done now.
 
 Or if you were already upgraded, run:
