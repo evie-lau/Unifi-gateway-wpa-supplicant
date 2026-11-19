@@ -3,6 +3,9 @@ Use this guide to setup wpa_supplicant with your Unifi gateway to bypass the ATT
 
 This works on modern [Unifi Consoles or Gateways](https://www.reddit.com/r/Ubiquiti/comments/1870ryr/unifi_gateways_explained_as_simple_as_possible/) except the original USG, which has a different process (see [Additional resources](#additional-resources)).
 
+> [!WARNING]
+> If you have a UDR7 or another gateway with built-in Wi-Fi, [check for the affected UniFi package](./udr7-hostapd-qca-workaround.md#check-whether-this-applies) before installing or upgrading `wpasupplicant`. On affected devices, use the [wired workaround](./udr7-hostapd-qca-workaround.md) instead of this guide's installation, testing, service, and reinstall steps. You can still follow the certificate, MAC address, and network settings sections below.
+
 > [!IMPORTANT]
 > This guide's default instructions are now for UniFi OS 6.x on Debian 13 (trixie). Older installations may still run Debian 11 (bullseye); check the gateway's Debian release below and use the legacy instructions where indicated.
 > 
@@ -82,14 +85,13 @@ dpkg -i ./*.deb
 
 If `dpkg` reports a missing dependency, install the matching `arm64` dependency package from the same Debian release, then retry.
 
-Create a `certs` folder in the `/etc/wpa_supplicant` folder.
+## Copy certs and config to Unifi gateway
+On the gateway, create the certificate folder:
+
 ```bash
 mkdir -p /etc/wpa_supplicant/certs
 ```
 
-We'll copy files into here in the next step.
-
-## Copy certs and config to Unifi gateway
 Back on your computer, prepare your files to copy into the Unifi gateway.
 
 These files come from the mfg_dat_decode tool:
